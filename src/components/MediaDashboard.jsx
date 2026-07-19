@@ -414,15 +414,19 @@ export default function MediaDashboard({ onBack }) {
                     {[0, 30, 60, 90, 120, 150].map(y => (
                       <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
                     ))}
-                    {/* Twitter curve - main line */}
-                    <path d="M 40 100 Q 90 90 140 85 T 240 40 T 340 90 L 380 40" fill="none" stroke="#06b6d4" strokeWidth="2" />
+                    
+                    {/* Twitter curve - main line - Polyline style connecting dots exactly */}
+                    <path d={[100, 90, 85, 60, 40, 90, 40].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 56} ${y}`).join(' ')} fill="none" stroke="#06b6d4" strokeWidth="2.5" />
+                    
                     {/* Other flat lines near bottom */}
-                    <path d="M 40 140 L 380 142" fill="none" stroke="#0f172a" strokeWidth="1.5" />
-                    <path d="M 40 145 L 380 146" fill="none" stroke="#ec4899" strokeWidth="1.5" />
-                    {/* Points for Twitter (Pointer Line Chart Fix: Colored dots with white border) */}
+                    <path d="M 40 140 L 376 140" fill="none" stroke="#0f172a" strokeWidth="1.5" />
+                    <path d="M 40 144 L 376 144" fill="none" stroke="#ec4899" strokeWidth="1.5" />
+                    
+                    {/* Points for Twitter (Pointer Line Chart Fix: Dots now match line coordinate exactly) */}
                     {[100, 90, 85, 60, 40, 90, 40].map((y, i) => (
                       <circle key={i} cx={40 + i * 56} cy={y} r="4.5" fill="#06b6d4" stroke="white" strokeWidth="2" />
                     ))}
+                    
                     {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
                       <text key={i} x={40 + i * 56} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
                     ))}
@@ -468,11 +472,10 @@ export default function MediaDashboard({ onBack }) {
                     {[0, 30, 60, 90, 120, 150].map(y => (
                       <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
                     ))}
-                    {/* Engagement curve */}
-                    <path d="M 40 50 Q 80 90 120 70 T 200 20 T 280 120 L 320 140 L 380 145" fill="none" stroke="#22d3ee" strokeWidth="2.5" />
-                    {/* Pointer dots fix */}
+                    {/* Engagement curve - exact points */}
+                    <path d={[50, 90, 70, 20, 120, 140, 145].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 56} ${y}`).join(' ')} fill="none" stroke="#22d3ee" strokeWidth="2.5" />
                     {[50, 90, 70, 20, 120, 140, 145].map((y, i) => (
-                      <circle key={i} cx={40 + i * 56} cy={y} r="4.5" fill="#06b6d4" stroke="white" strokeWidth="2" />
+                      <circle key={i} cx={40 + i * 56} cy={y} r="4.5" fill="#22d3ee" stroke="white" strokeWidth="2" />
                     ))}
                     {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
                       <text key={i} x={40 + i * 56} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
@@ -596,26 +599,33 @@ export default function MediaDashboard({ onBack }) {
                 </div>
               </DashboardCard>
 
-              {/* Top Locations by Engagement */}
+              {/* Top Locations by Engagement (Horizontal Bar Chart Fix: No Gap, Right-Aligned Labels) */}
               <DashboardCard title="Top Locations by Engagement" subtitle="Displays the most mentioned locations associated with th..." source="Social Media">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px' }}>
                   {[
-                    { name: 'Jawa Timur', val: '9.415,31' },
-                    { name: 'Dki Jakarta', val: '9.167,87' },
-                    { name: 'Lampung', val: '2.080,40' },
-                    { name: 'Sumatera Selatan', val: '2.053,15' },
-                    { name: 'Jawa Tengah', val: '1.548,20' },
-                    { name: 'Kalimantan Barat', val: '1.103,20' },
-                    { name: 'Jawa Barat', val: '610,30' }
+                    { name: 'Jawa Timur', val: '9.415,31', percent: 100 },
+                    { name: 'Dki Jakarta', val: '9.167,87', percent: 97.3 },
+                    { name: 'Lampung', val: '2.080,40', percent: 22.1 },
+                    { name: 'Sumatera Selatan', val: '2.053,15', percent: 21.8 },
+                    { name: 'Jawa Tengah', val: '1.548,20', percent: 16.4 },
+                    { name: 'Kalimantan Barat', val: '1.103,20', percent: 11.7 },
+                    { name: 'Jawa Barat', val: '610,30', percent: 6.5 }
                   ].map((row, idx) => (
-                    <div key={idx}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px', fontWeight: '500' }}>
-                        <span>{row.name}</span>
-                        <span>{row.val}</span>
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', height: '20px' }}>
+                      <span style={{ width: '90px', textAlign: 'right', marginRight: '12px', fontWeight: '500', color: '#475569', flexShrink: 0 }}>
+                        {row.name}
+                      </span>
+                      <div style={{ flexGrow: 1, height: '12px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ 
+                          height: '100%', 
+                          backgroundColor: '#1d4ed8', 
+                          width: `${row.percent}%`,
+                          borderRadius: '2px'
+                        }} />
                       </div>
-                      <div style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', backgroundColor: '#1d4ed8', width: idx === 0 ? '100%' : idx === 1 ? '98%' : idx === 2 ? '22%' : '15%' }} />
-                      </div>
+                      <span style={{ width: '55px', textAlign: 'left', marginLeft: '12px', fontWeight: '700', color: '#0f172a', flexShrink: 0 }}>
+                        {row.val}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -651,11 +661,11 @@ export default function MediaDashboard({ onBack }) {
                       <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
                     ))}
                     {/* Red line */}
-                    <path d="M 40 70 L 90 50 L 140 30 L 190 20 L 240 40 L 290 85 L 340 120" fill="none" stroke="#b91c1c" strokeWidth="2" />
+                    <path d={[70, 50, 30, 20, 40, 85, 120].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#b91c1c" strokeWidth="2" />
                     {/* Grey line */}
-                    <path d="M 40 90 L 90 85 L 140 92 L 190 90 L 240 100 L 290 115 L 340 135" fill="none" stroke="#4b5563" strokeWidth="2" />
+                    <path d={[90, 85, 92, 90, 100, 115, 135].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#4b5563" strokeWidth="2" />
                     {/* Blue line */}
-                    <path d="M 40 110 L 90 108 L 140 115 L 190 110 L 240 120 L 290 130 L 340 142" fill="none" stroke="#2563eb" strokeWidth="2" />
+                    <path d={[110, 108, 115, 110, 120, 130, 142].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#2563eb" strokeWidth="2" />
                     
                     {/* Pointers dots fix */}
                     {[70, 50, 30, 20, 40, 85, 120].map((y, i) => (
@@ -701,11 +711,11 @@ export default function MediaDashboard({ onBack }) {
                       <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
                     ))}
                     {/* Red line */}
-                    <path d="M 40 60 L 90 85 L 140 20 L 190 90 L 240 70 L 290 120 L 340 135" fill="none" stroke="#b91c1c" strokeWidth="2" />
+                    <path d={[60, 85, 20, 90, 70, 120, 135].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#b91c1c" strokeWidth="2" />
                     {/* Grey line */}
-                    <path d="M 40 120 L 90 100 L 140 115 L 190 105 L 240 110 L 290 130 L 340 135" fill="none" stroke="#4b5563" strokeWidth="2" />
+                    <path d={[120, 100, 115, 105, 110, 130, 135].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#4b5563" strokeWidth="2" />
                     {/* Blue line */}
-                    <path d="M 40 70 L 90 90 L 140 45 L 190 120 L 240 130 L 290 135 L 340 138" fill="none" stroke="#2563eb" strokeWidth="2" />
+                    <path d={[70, 90, 45, 120, 130, 135, 138].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#2563eb" strokeWidth="2" />
                     
                     {/* Pointers dots fix */}
                     {[60, 85, 20, 90, 70, 120, 135].map((y, i) => (
@@ -753,11 +763,11 @@ export default function MediaDashboard({ onBack }) {
                       <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
                     ))}
                     {/* Disgust (Purple) curve */}
-                    <path d="M 40 80 Q 90 70 140 30 T 240 50 T 340 70 L 380 110" fill="none" stroke="#8b5cf6" strokeWidth="2" />
+                    <path d={[80, 72, 30, 42, 50, 70, 110].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#8b5cf6" strokeWidth="2" />
                     {/* Anticipation (Orange) curve */}
-                    <path d="M 40 100 L 90 92 L 140 75 L 190 85 L 240 102 L 290 98 L 340 120" fill="none" stroke="#f59e0b" strokeWidth="1.5" />
+                    <path d={[100, 92, 75, 85, 102, 98, 120].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#f59e0b" strokeWidth="1.5" />
                     {/* Trust (Green) curve */}
-                    <path d="M 40 120 L 90 125 L 140 110 L 190 115 L 240 120 L 290 122 L 340 125" fill="none" stroke="#84cc16" strokeWidth="1.5" />
+                    <path d={[120, 125, 110, 115, 120, 122, 125].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#84cc16" strokeWidth="1.5" />
                     
                     {/* Pointers dots fix */}
                     {[80, 72, 30, 42, 50, 70, 110].map((y, i) => (
@@ -765,6 +775,9 @@ export default function MediaDashboard({ onBack }) {
                     ))}
                     {[100, 92, 75, 85, 102, 98, 120].map((y, i) => (
                       <circle key={`anticip-${i}`} cx={40 + i * 50} cy={y} r="3.5" fill="#f59e0b" stroke="white" strokeWidth="1.5" />
+                    ))}
+                    {[120, 125, 110, 115, 120, 122, 125].map((y, i) => (
+                      <circle key={`trust-${i}`} cx={40 + i * 50} cy={y} r="3.5" fill="#84cc16" stroke="white" strokeWidth="1.5" />
                     ))}
 
                     {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
@@ -802,13 +815,16 @@ export default function MediaDashboard({ onBack }) {
                       <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
                     ))}
                     {/* Anticipation (Orange) dominant line */}
-                    <path d="M 40 40 L 90 90 L 140 20 L 190 120 L 240 145 L 340 146" fill="none" stroke="#f59e0b" strokeWidth="2.5" />
+                    <path d={[40, 90, 20, 120, 145, 146].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 60} ${y}`).join(' ')} fill="none" stroke="#f59e0b" strokeWidth="2.5" />
                     {/* Trust (Green) */}
-                    <path d="M 40 130 L 90 125 L 140 80 L 190 135 L 240 142 L 340 145" fill="none" stroke="#84cc16" strokeWidth="1.5" />
+                    <path d={[130, 125, 80, 135, 142, 145].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 60} ${y}`).join(' ')} fill="none" stroke="#84cc16" strokeWidth="1.5" />
                     
                     {/* Pointers dots fix */}
                     {[40, 90, 20, 120, 145, 146].map((y, i) => (
                       <circle key={`anticip-eng-${i}`} cx={40 + i * 60} cy={y} r="3.5" fill="#f59e0b" stroke="white" strokeWidth="1.5" />
+                    ))}
+                    {[130, 125, 80, 135, 142, 145].map((y, i) => (
+                      <circle key={`trust-eng-${i}`} cx={40 + i * 60} cy={y} r="3.5" fill="#84cc16" stroke="white" strokeWidth="1.5" />
                     ))}
 
                     {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
@@ -1089,26 +1105,26 @@ export default function MediaDashboard({ onBack }) {
                     {[0, 25, 50, 75, 100, 125, 150].map(y => (
                       <line key={y} x1="30" y1={y} x2="480" y2={y} stroke="#f1f5f9" />
                     ))}
-                    {/* Blue line (Positive) */}
-                    <path d="M 40 90 L 80 40 L 120 70 L 160 30 L 200 60 L 240 85 L 280 120 L 320 140 L 360 140 L 400 100 L 440 90 L 480 140" fill="none" stroke="#2563eb" strokeWidth="2" />
+                    {/* Blue line (Positive) - exact polyline dots alignment */}
+                    <path d={[90, 40, 70, 30, 60, 85, 120, 140, 140, 100, 90, 110, 140].map((y, i) => `${i === 0 ? 'M' : 'L'} ${38 + i * 35} ${y}`).join(' ')} fill="none" stroke="#2563eb" strokeWidth="2" />
                     {/* Grey line (Neutral) */}
-                    <path d="M 40 110 L 80 100 L 120 130 L 160 110 L 200 95 L 240 105 L 280 110 L 320 142 L 360 130 L 400 120 L 440 110 L 480 138" fill="none" stroke="#4b5563" strokeWidth="2" />
+                    <path d={[110, 100, 130, 110, 95, 105, 110, 142, 130, 120, 110, 115, 138].map((y, i) => `${i === 0 ? 'M' : 'L'} ${38 + i * 35} ${y}`).join(' ')} fill="none" stroke="#4b5563" strokeWidth="2" />
                     {/* Red line (Negative) */}
-                    <path d="M 40 142 L 80 115 L 120 135 L 160 132 L 200 125 L 240 122 L 280 145 L 320 148 L 360 140 L 400 132 L 440 130 L 480 145" fill="none" stroke="#b91c1c" strokeWidth="2" />
+                    <path d={[142, 115, 135, 132, 125, 122, 145, 148, 140, 132, 130, 128, 145].map((y, i) => `${i === 0 ? 'M' : 'L'} ${38 + i * 35} ${y}`).join(' ')} fill="none" stroke="#b91c1c" strokeWidth="2" />
                     
-                    {/* Pointers dots fix (Circular dots with white border) */}
-                    {[90, 40, 70, 30, 60, 85, 120, 140, 140, 100, 90, 140].map((y, i) => (
-                      <circle key={`blue-news-${i}`} cx={40 + i * 40} cy={y} r="4.5" fill="#2563eb" stroke="white" strokeWidth="1.5" />
+                    {/* Pointers dots fix (Circular dots with white border aligning exactly with paths) */}
+                    {[90, 40, 70, 30, 60, 85, 120, 140, 140, 100, 90, 110, 140].map((y, i) => (
+                      <circle key={`blue-news-${i}`} cx={38 + i * 35} cy={y} r="4.5" fill="#2563eb" stroke="white" strokeWidth="1.5" />
                     ))}
-                    {[110, 100, 130, 110, 95, 105, 110, 142, 130, 120, 110, 138].map((y, i) => (
-                      <circle key={`grey-news-${i}`} cx={40 + i * 40} cy={y} r="4.5" fill="#4b5563" stroke="white" strokeWidth="1.5" />
+                    {[110, 100, 130, 110, 95, 105, 110, 142, 130, 120, 110, 115, 138].map((y, i) => (
+                      <circle key={`grey-news-${i}`} cx={38 + i * 35} cy={y} r="4.5" fill="#4b5563" stroke="white" strokeWidth="1.5" />
                     ))}
-                    {[142, 115, 135, 132, 125, 122, 145, 148, 140, 132, 130, 145].map((y, i) => (
-                      <circle key={`red-news-${i}`} cx={40 + i * 40} cy={y} r="4.5" fill="#b91c1c" stroke="white" strokeWidth="1.5" />
+                    {[142, 115, 135, 132, 125, 122, 145, 148, 140, 132, 130, 128, 145].map((y, i) => (
+                      <circle key={`red-news-${i}`} cx={38 + i * 35} cy={y} r="4.5" fill="#b91c1c" stroke="white" strokeWidth="1.5" />
                     ))}
 
                     {['14:00', '16:00', '18:00', '20:00', '22:00', '00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00'].map((x, i) => (
-                      <text key={i} x={40 + i * 36.6} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
+                      <text key={i} x={38 + i * 35} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
                     ))}
                     {['0', '10', '20', '30', '40', '50', '60'].map((val, i) => (
                       <text key={i} x="20" y={150 - i * 25 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
@@ -1320,27 +1336,36 @@ export default function MediaDashboard({ onBack }) {
                 </div>
               </DashboardCard>
 
-              {/* Top News Location Horizontal Bar Chart */}
+              {/* Top News Location Horizontal Bar Chart (Fix: No Gap, Right-Aligned Labels) */}
               <DashboardCard title="Top News Location" subtitle="Displays the most frequently mentioned locations in mainstream media reporting." source="Mainstream Media">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px' }}>
                   {[
-                    { name: 'Jawa Timur', val: 750 },
-                    { name: 'Dki Jakarta', val: 400 },
-                    { name: 'Jawa Barat', val: 250 },
-                    { name: 'Jawa Tengah', val: 220 },
-                    { name: 'Maluku', val: 160 },
-                    { name: 'Sumatera Selatan', val: 130 },
-                    { name: 'Lampung', val: 100 },
-                    { name: 'Sulawesi Selatan', val: 95 },
-                    { name: 'Banten', val: 85 },
-                    { name: 'Sumatera Utara', val: 80 }
+                    { name: 'Jawa Timur', val: 750, percent: 100 },
+                    { name: 'Dki Jakarta', val: 400, percent: 53.3 },
+                    { name: 'Jawa Barat', val: 250, percent: 33.3 },
+                    { name: 'Jawa Tengah', val: 220, percent: 29.3 },
+                    { name: 'Maluku', val: 160, percent: 21.3 },
+                    { name: 'Sumatera Selatan', val: 130, percent: 17.3 },
+                    { name: 'Lampung', val: 100, percent: 13.3 },
+                    { name: 'Sulawesi Selatan', val: 95, percent: 12.7 },
+                    { name: 'Banten', val: 85, percent: 11.3 },
+                    { name: 'Sumatera Utara', val: 80, percent: 10.7 }
                   ].map((row, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{ width: '120px', fontWeight: '500' }}>{row.name}</span>
-                      <div style={{ flexGrow: 1, height: '12px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', backgroundColor: '#b91c1c', width: `${(row.val / 800) * 100}%` }} />
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', height: '18px' }}>
+                      <span style={{ width: '100px', textAlign: 'right', marginRight: '12px', fontWeight: '500', color: '#475569', flexShrink: 0 }}>
+                        {row.name}
+                      </span>
+                      <div style={{ flexGrow: 1, height: '12px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ 
+                          height: '100%', 
+                          backgroundColor: '#b91c1c', 
+                          width: `${row.percent}%`,
+                          borderRadius: '2px'
+                        }} />
                       </div>
-                      <span style={{ width: '40px', textAlign: 'right', fontWeight: 'bold', color: '#0f172a', marginLeft: '8px' }}>{row.val}</span>
+                      <span style={{ width: '40px', textAlign: 'left', marginLeft: '12px', fontWeight: '700', color: '#0f172a', flexShrink: 0 }}>
+                        {row.val}
+                      </span>
                     </div>
                   ))}
                 </div>
