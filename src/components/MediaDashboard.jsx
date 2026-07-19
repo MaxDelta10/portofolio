@@ -51,6 +51,81 @@ const DonutChart = ({ data }) => {
   );
 };
 
+// Reusable Area Line Chart Component matching Ebdesk Fusion reference
+// Renders lines with area fills, precise dot placement, spanning full container width
+const AreaLineChart = ({ lines, xLabels, yLabels, height = 200, viewBoxW = 500, viewBoxH = 160, padL = 35, padR = 10, padT = 5, padB = 25 }) => {
+  const chartW = viewBoxW - padL - padR;
+  const chartH = viewBoxH - padT - padB;
+  const n = xLabels.length;
+  const xStep = chartW / (n - 1);
+
+  // Convert data array to SVG coordinates
+  const toPoints = (data) => data.map((val, i) => ({
+    x: padL + i * xStep,
+    y: padT + chartH - (val / 100) * chartH // val is 0-100 normalized
+  }));
+
+  // Build SVG path string from points
+  const pathD = (pts) => pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+
+  // Build closed area path (line + bottom edge)
+  const areaD = (pts) => {
+    const line = pathD(pts);
+    return `${line} L ${pts[pts.length - 1].x.toFixed(1)} ${padT + chartH} L ${pts[0].x.toFixed(1)} ${padT + chartH} Z`;
+  };
+
+  // Grid lines
+  const gridCount = yLabels.length;
+  const gridLines = Array.from({ length: gridCount }, (_, i) => padT + chartH - (i / (gridCount - 1)) * chartH);
+
+  return (
+    <div style={{ height: `${height}px` }}>
+      <svg viewBox={`0 0 ${viewBoxW} ${viewBoxH + 15}`} style={{ width: '100%', height: '100%' }} preserveAspectRatio="none">
+        {/* Grid lines */}
+        {gridLines.map((y, i) => (
+          <line key={`g-${i}`} x1={padL} y1={y} x2={viewBoxW - padR} y2={y} stroke="#f1f5f9" strokeWidth="0.5" />
+        ))}
+
+        {/* Area fills (rendered first, behind lines) */}
+        {lines.map((line, li) => {
+          if (!line.area) return null;
+          const pts = toPoints(line.data);
+          return (
+            <path key={`area-${li}`} d={areaD(pts)} fill={line.color} opacity={line.areaOpacity || 0.12} />
+          );
+        })}
+
+        {/* Lines */}
+        {lines.map((line, li) => {
+          const pts = toPoints(line.data);
+          return (
+            <path key={`line-${li}`} d={pathD(pts)} fill="none" stroke={line.color} strokeWidth={line.width || 2} />
+          );
+        })}
+
+        {/* Dots */}
+        {lines.map((line, li) => {
+          if (line.hideDots) return null;
+          const pts = toPoints(line.data);
+          return pts.map((p, pi) => (
+            <circle key={`dot-${li}-${pi}`} cx={p.x} cy={p.y} r={line.dotR || 3.5} fill={line.color} stroke="white" strokeWidth="1.5" />
+          ));
+        })}
+
+        {/* X-axis labels */}
+        {xLabels.map((label, i) => (
+          <text key={`xl-${i}`} x={padL + i * xStep} y={viewBoxH + 10} fill="#94a3b8" fontSize="7" textAnchor="middle">{label}</text>
+        ))}
+
+        {/* Y-axis labels */}
+        {yLabels.map((label, i) => (
+          <text key={`yl-${i}`} x={padL - 4} y={gridLines[i] + 2.5} fill="#94a3b8" fontSize="7" textAnchor="end">{label}</text>
+        ))}
+      </svg>
+    </div>
+  );
+};
+
 // Reusable Dashboard Card Component
 const DashboardCard = ({ title, subtitle, source, children, style, contentStyle }) => (
   <div style={{ 
@@ -416,32 +491,19 @@ export default function MediaDashboard({ onBack }) {
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#06b6d4' }}/> Twitter</span>
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#ef4444' }}/> Youtube</span>
                 </div>
-                <div style={{ height: '200px' }}>
-                  <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {[0, 30, 60, 90, 120, 150].map(y => (
-                      <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
-                    ))}
-                    
-                    {/* Twitter curve - main line - Polyline style connecting dots exactly */}
-                    <path d={[100, 90, 85, 60, 40, 90, 40].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 56} ${y}`).join(' ')} fill="none" stroke="#06b6d4" strokeWidth="2.5" />
-                    
-                    {/* Other flat lines near bottom */}
-                    <path d="M 40 140 L 376 140" fill="none" stroke="#0f172a" strokeWidth="1.5" />
-                    <path d="M 40 144 L 376 144" fill="none" stroke="#ec4899" strokeWidth="1.5" />
-                    
-                    {/* Points for Twitter (Pointer Line Chart Fix: Dots now match line coordinate exactly) */}
-                    {[100, 90, 85, 60, 40, 90, 40].map((y, i) => (
-                      <circle key={i} cx={40 + i * 56} cy={y} r="4.5" fill="#06b6d4" stroke="white" strokeWidth="2" />
-                    ))}
-                    
-                    {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
-                      <text key={i} x={40 + i * 56} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
-                    ))}
-                    {['0', '200', '400', '600', '800', '1K'].map((val, i) => (
-                      <text key={i} x="20" y={150 - i * 30 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
-                    ))}
-                  </svg>
-                </div>
+                <AreaLineChart
+                  height={200}
+                  xLabels={['09:00','11:00','13:00','15:00','17:00','19:00','21:00','23:00','01:00','03:00','05:00','07:00','09:00']}
+                  yLabels={['0','10K','20K','30K','40K','50K']}
+                  lines={[
+                    { data: [72,76,78,80,64,62,88,92,90,52,56,70,54], color: '#06b6d4', width: 2.5, area: true, areaOpacity: 0.15, dotR: 3.5 },
+                    { data: [18,20,22,24,24,25,28,26,14,6,5,8,6], color: '#0f172a', width: 1.5, area: true, areaOpacity: 0.08, dotR: 2.5 },
+                    { data: [6,8,10,12,14,14,16,12,8,4,3,4,3], color: '#94a3b8', width: 1.5, area: true, areaOpacity: 0.06, dotR: 2.5 },
+                    { data: [2,3,4,5,5,6,6,4,3,2,2,2,2], color: '#3b82f6', width: 1.5, dotR: 2 },
+                    { data: [1,2,2,3,3,3,4,3,2,1,1,1,1], color: '#ec4899', width: 1.5, dotR: 2 },
+                    { data: [1,1,1,1,2,2,2,1,1,1,1,1,1], color: '#ef4444', width: 1.5, dotR: 2 }
+                  ]}
+                />
               </DashboardCard>
 
               {/* Top Keywords */}
@@ -474,24 +536,14 @@ export default function MediaDashboard({ onBack }) {
                 subtitle="Shows engagement trends over a defined time period on social media platforms, including likes, shares, comments, and other..."
                 source="Media Sosial"
               >
-                <div style={{ height: '200px' }}>
-                  <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {[0, 30, 60, 90, 120, 150].map(y => (
-                      <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
-                    ))}
-                    {/* Engagement curve - exact points */}
-                    <path d={[50, 90, 70, 20, 120, 140, 145].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 56} ${y}`).join(' ')} fill="none" stroke="#22d3ee" strokeWidth="2.5" />
-                    {[50, 90, 70, 20, 120, 140, 145].map((y, i) => (
-                      <circle key={i} cx={40 + i * 56} cy={y} r="4.5" fill="#22d3ee" stroke="white" strokeWidth="2" />
-                    ))}
-                    {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
-                      <text key={i} x={40 + i * 56} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
-                    ))}
-                    {['0', '5K', '10K', '15K', '20K', '25K', '30K'].map((val, i) => (
-                      <text key={i} x="20" y={150 - i * 25 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
-                    ))}
-                  </svg>
-                </div>
+                <AreaLineChart
+                  height={200}
+                  xLabels={['09:00','11:00','13:00','15:00','17:00','19:00','21:00','23:00','01:00','03:00','05:00','07:00','09:00']}
+                  yLabels={['0','5K','10K','15K','20K','25K','30K']}
+                  lines={[
+                    { data: [20,32,28,35,38,70,90,88,50,10,8,6,4], color: '#22d3ee', width: 2.5, area: true, areaOpacity: 0.15, dotR: 3.5 }
+                  ]}
+                />
               </DashboardCard>
 
               {/* Top Keywords by Engagement */}
@@ -662,37 +714,16 @@ export default function MediaDashboard({ onBack }) {
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}/> Neutral</span>
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#2563eb' }}/> Positive</span>
                 </div>
-                <div style={{ height: '180px' }}>
-                  <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {[0, 30, 60, 90, 120, 150].map(y => (
-                      <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
-                    ))}
-                    {/* Red line */}
-                    <path d={[70, 50, 30, 20, 40, 85, 120].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#b91c1c" strokeWidth="2" />
-                    {/* Grey line */}
-                    <path d={[90, 85, 92, 90, 100, 115, 135].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#4b5563" strokeWidth="2" />
-                    {/* Blue line */}
-                    <path d={[110, 108, 115, 110, 120, 130, 142].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#2563eb" strokeWidth="2" />
-                    
-                    {/* Pointers dots fix */}
-                    {[70, 50, 30, 20, 40, 85, 120].map((y, i) => (
-                      <circle key={`red-${i}`} cx={40 + i * 50} cy={y} r="4" fill="#b91c1c" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[90, 85, 92, 90, 100, 115, 135].map((y, i) => (
-                      <circle key={`grey-${i}`} cx={40 + i * 50} cy={y} r="4" fill="#4b5563" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[110, 108, 115, 110, 120, 130, 142].map((y, i) => (
-                      <circle key={`blue-${i}`} cx={40 + i * 50} cy={y} r="4" fill="#2563eb" stroke="white" strokeWidth="1.5" />
-                    ))}
-
-                    {['07 Jun', '08 Jun', '09 Jun', '10 Jun', '11 Jun', '12 Jun', '13 Jun'].map((x, i) => (
-                      <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
-                    ))}
-                    {['0', '200', '400', '600'].map((val, i) => (
-                      <text key={i} x="20" y={150 - i * 40 - 10 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
-                    ))}
-                  </svg>
-                </div>
+                <AreaLineChart
+                  height={180}
+                  xLabels={['07 Jun','08 Jun','09 Jun','10 Jun','11 Jun','12 Jun','13 Jun']}
+                  yLabels={['0','100','200','300','400','450']}
+                  lines={[
+                    { data: [60,70,80,85,78,72,68,], color: '#b91c1c', width: 2, area: true, areaOpacity: 0.10, dotR: 3.5 },
+                    { data: [48,55,50,52,50,48,45], color: '#4b5563', width: 2, area: true, areaOpacity: 0.06, dotR: 3.5 },
+                    { data: [18,22,15,20,25,30,28], color: '#2563eb', width: 2, dotR: 3.5 }
+                  ]}
+                />
               </DashboardCard>
 
               {/* Sentiment Proportion */}
@@ -712,37 +743,16 @@ export default function MediaDashboard({ onBack }) {
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}/> Neutral</span>
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#2563eb' }}/> Positive</span>
                 </div>
-                <div style={{ height: '180px' }}>
-                  <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {[0, 30, 60, 90, 120, 150].map(y => (
-                      <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
-                    ))}
-                    {/* Red line */}
-                    <path d={[60, 85, 20, 90, 70, 120, 135].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#b91c1c" strokeWidth="2" />
-                    {/* Grey line */}
-                    <path d={[120, 100, 115, 105, 110, 130, 135].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#4b5563" strokeWidth="2" />
-                    {/* Blue line */}
-                    <path d={[70, 90, 45, 120, 130, 135, 138].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#2563eb" strokeWidth="2" />
-                    
-                    {/* Pointers dots fix */}
-                    {[60, 85, 20, 90, 70, 120, 135].map((y, i) => (
-                      <circle key={`red-eng-${i}`} cx={40 + i * 50} cy={y} r="4" fill="#b91c1c" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[120, 100, 115, 105, 110, 130, 135].map((y, i) => (
-                      <circle key={`grey-eng-${i}`} cx={40 + i * 50} cy={y} r="4" fill="#4b5563" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[70, 90, 45, 120, 130, 135, 138].map((y, i) => (
-                      <circle key={`blue-eng-${i}`} cx={40 + i * 50} cy={y} r="4" fill="#2563eb" stroke="white" strokeWidth="1.5" />
-                    ))}
-
-                    {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
-                      <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
-                    ))}
-                    {['0', '3K', '6K', '9K', '12K', '15K', '18K'].map((val, i) => (
-                      <text key={i} x="20" y={150 - i * 22 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
-                    ))}
-                  </svg>
-                </div>
+                <AreaLineChart
+                  height={180}
+                  xLabels={['09:00','11:00','13:00','15:00','17:00','19:00','21:00','23:00','01:00','03:00','05:00','07:00','09:00']}
+                  yLabels={['0','0.5M','1.0M','1.5M','2.0M','2.5M','3.0M','3.5M']}
+                  lines={[
+                    { data: [15,30,38,42,55,70,80,65,52,40,48,55,50], color: '#b91c1c', width: 2, area: true, areaOpacity: 0.10, dotR: 3 },
+                    { data: [8,14,18,20,30,40,52,35,22,16,20,24,22], color: '#4b5563', width: 2, area: true, areaOpacity: 0.06, dotR: 3 },
+                    { data: [4,6,8,10,12,18,22,14,10,6,8,10,8], color: '#2563eb', width: 2, dotR: 3 }
+                  ]}
+                />
               </DashboardCard>
 
               {/* Sentiment Proportion by Engagement */}
@@ -764,37 +774,19 @@ export default function MediaDashboard({ onBack }) {
                     </span>
                   ))}
                 </div>
-                <div style={{ height: '180px' }}>
-                  <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {[0, 30, 60, 90, 120, 150].map(y => (
-                      <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
-                    ))}
-                    {/* Disgust (Purple) curve */}
-                    <path d={[80, 72, 30, 42, 50, 70, 110].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#8b5cf6" strokeWidth="2" />
-                    {/* Anticipation (Orange) curve */}
-                    <path d={[100, 92, 75, 85, 102, 98, 120].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#f59e0b" strokeWidth="1.5" />
-                    {/* Trust (Green) curve */}
-                    <path d={[120, 125, 110, 115, 120, 122, 125].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 50} ${y}`).join(' ')} fill="none" stroke="#84cc16" strokeWidth="1.5" />
-                    
-                    {/* Pointers dots fix */}
-                    {[80, 72, 30, 42, 50, 70, 110].map((y, i) => (
-                      <circle key={`disgust-${i}`} cx={40 + i * 50} cy={y} r="3.5" fill="#8b5cf6" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[100, 92, 75, 85, 102, 98, 120].map((y, i) => (
-                      <circle key={`anticip-${i}`} cx={40 + i * 50} cy={y} r="3.5" fill="#f59e0b" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[120, 125, 110, 115, 120, 122, 125].map((y, i) => (
-                      <circle key={`trust-${i}`} cx={40 + i * 50} cy={y} r="3.5" fill="#84cc16" stroke="white" strokeWidth="1.5" />
-                    ))}
-
-                    {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
-                      <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
-                    ))}
-                    {['0', '50', '100', '150', '200', '250'].map((val, i) => (
-                      <text key={i} x="20" y={150 - i * 30 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
-                    ))}
-                  </svg>
-                </div>
+                <AreaLineChart
+                  height={180}
+                  xLabels={['09:00','11:00','13:00','15:00','17:00','19:00','21:00','23:00','01:00','03:00','05:00','07:00','09:00']}
+                  yLabels={['0','50','100','150','200','250']}
+                  lines={[
+                    { data: [30,38,45,55,60,72,80,68,40,20,18,22,16], color: '#8b5cf6', width: 2, area: true, areaOpacity: 0.10, dotR: 3 },
+                    { data: [20,25,30,35,40,50,55,42,28,15,14,16,12], color: '#f59e0b', width: 1.5, dotR: 3 },
+                    { data: [10,12,15,18,20,25,28,22,16,10,8,10,8], color: '#84cc16', width: 1.5, dotR: 3 },
+                    { data: [8,10,12,14,15,18,20,16,12,8,6,8,6], color: '#1d4ed8', width: 1, dotR: 2 },
+                    { data: [6,8,9,10,12,14,15,12,8,5,4,5,4], color: '#dc2626', width: 1, dotR: 2 },
+                    { data: [4,5,6,7,8,10,12,8,6,3,3,4,3], color: '#06b6d4', width: 1, dotR: 2 }
+                  ]}
+                />
               </DashboardCard>
 
               {/* Emotion Distribution */}
@@ -816,32 +808,17 @@ export default function MediaDashboard({ onBack }) {
                     </span>
                   ))}
                 </div>
-                <div style={{ height: '180px' }}>
-                  <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {[0, 30, 60, 90, 120, 150].map(y => (
-                      <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
-                    ))}
-                    {/* Anticipation (Orange) dominant line */}
-                    <path d={[40, 90, 20, 120, 145, 146].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 60} ${y}`).join(' ')} fill="none" stroke="#f59e0b" strokeWidth="2.5" />
-                    {/* Trust (Green) */}
-                    <path d={[130, 125, 80, 135, 142, 145].map((y, i) => `${i === 0 ? 'M' : 'L'} ${40 + i * 60} ${y}`).join(' ')} fill="none" stroke="#84cc16" strokeWidth="1.5" />
-                    
-                    {/* Pointers dots fix */}
-                    {[40, 90, 20, 120, 145, 146].map((y, i) => (
-                      <circle key={`anticip-eng-${i}`} cx={40 + i * 60} cy={y} r="3.5" fill="#f59e0b" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[130, 125, 80, 135, 142, 145].map((y, i) => (
-                      <circle key={`trust-eng-${i}`} cx={40 + i * 60} cy={y} r="3.5" fill="#84cc16" stroke="white" strokeWidth="1.5" />
-                    ))}
-
-                    {['14:00', '18:00', '22:00', '02:00', '06:00', '10:00', '14:00'].map((x, i) => (
-                      <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
-                    ))}
-                    {['0', '2K', '4K', '6K', '8K', '10K', '12K'].map((val, i) => (
-                      <text key={i} x="20" y={150 - i * 22 - 10 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
-                    ))}
-                  </svg>
-                </div>
+                <AreaLineChart
+                  height={180}
+                  xLabels={['09:00','11:00','13:00','15:00','17:00','19:00','21:00','23:00','01:00','03:00','05:00','07:00','09:00']}
+                  yLabels={['0','2K','4K','6K','8K','10K','12K']}
+                  lines={[
+                    { data: [15,28,35,40,55,80,90,68,35,12,8,10,6], color: '#f59e0b', width: 2.5, area: true, areaOpacity: 0.12, dotR: 3.5 },
+                    { data: [6,10,14,18,22,35,42,28,16,8,6,8,5], color: '#84cc16', width: 1.5, area: true, areaOpacity: 0.06, dotR: 3 },
+                    { data: [3,5,7,8,10,15,18,12,8,4,3,4,3], color: '#06b6d4', width: 1, dotR: 2 },
+                    { data: [2,3,4,5,6,8,10,6,4,2,2,2,2], color: '#eab308', width: 1, dotR: 2 }
+                  ]}
+                />
               </DashboardCard>
 
               {/* Emotion by Engagement */}
@@ -1107,37 +1084,16 @@ export default function MediaDashboard({ onBack }) {
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}/> Neutral</span>
                   <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#2563eb' }}/> Positive</span>
                 </div>
-                <div style={{ height: '180px' }}>
-                  <svg viewBox="0 0 500 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {[0, 25, 50, 75, 100, 125, 150].map(y => (
-                      <line key={y} x1="30" y1={y} x2="480" y2={y} stroke="#f1f5f9" />
-                    ))}
-                    {/* Blue line (Positive) - exact polyline dots alignment */}
-                    <path d={[90, 40, 70, 30, 60, 85, 120, 140, 140, 100, 90, 110, 140].map((y, i) => `${i === 0 ? 'M' : 'L'} ${38 + i * 35} ${y}`).join(' ')} fill="none" stroke="#2563eb" strokeWidth="2" />
-                    {/* Grey line (Neutral) */}
-                    <path d={[110, 100, 130, 110, 95, 105, 110, 142, 130, 120, 110, 115, 138].map((y, i) => `${i === 0 ? 'M' : 'L'} ${38 + i * 35} ${y}`).join(' ')} fill="none" stroke="#4b5563" strokeWidth="2" />
-                    {/* Red line (Negative) */}
-                    <path d={[142, 115, 135, 132, 125, 122, 145, 148, 140, 132, 130, 128, 145].map((y, i) => `${i === 0 ? 'M' : 'L'} ${38 + i * 35} ${y}`).join(' ')} fill="none" stroke="#b91c1c" strokeWidth="2" />
-                    
-                    {/* Pointers dots fix (Circular dots with white border aligning exactly with paths) */}
-                    {[90, 40, 70, 30, 60, 85, 120, 140, 140, 100, 90, 110, 140].map((y, i) => (
-                      <circle key={`blue-news-${i}`} cx={38 + i * 35} cy={y} r="4.5" fill="#2563eb" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[110, 100, 130, 110, 95, 105, 110, 142, 130, 120, 110, 115, 138].map((y, i) => (
-                      <circle key={`grey-news-${i}`} cx={38 + i * 35} cy={y} r="4.5" fill="#4b5563" stroke="white" strokeWidth="1.5" />
-                    ))}
-                    {[142, 115, 135, 132, 125, 122, 145, 148, 140, 132, 130, 128, 145].map((y, i) => (
-                      <circle key={`red-news-${i}`} cx={38 + i * 35} cy={y} r="4.5" fill="#b91c1c" stroke="white" strokeWidth="1.5" />
-                    ))}
-
-                    {['14:00', '16:00', '18:00', '20:00', '22:00', '00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00'].map((x, i) => (
-                      <text key={i} x={38 + i * 35} y="165" fill="#94a3b8" fontSize="8" textAnchor="middle">{x}</text>
-                    ))}
-                    {['0', '10', '20', '30', '40', '50', '60'].map((val, i) => (
-                      <text key={i} x="20" y={150 - i * 25 + 3} fill="#94a3b8" fontSize="8" textAnchor="end">{val}</text>
-                    ))}
-                  </svg>
-                </div>
+                <AreaLineChart
+                  height={180}
+                  xLabels={['14:00','16:00','18:00','20:00','22:00','00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00']}
+                  yLabels={['0','10','20','30','40','50','60']}
+                  lines={[
+                    { data: [50,80,65,85,70,55,30,15,10,40,50,45,30], color: '#2563eb', width: 2, area: true, areaOpacity: 0.10, dotR: 3.5 },
+                    { data: [28,35,22,30,38,32,20,8,12,22,28,25,18], color: '#4b5563', width: 2, area: true, areaOpacity: 0.06, dotR: 3.5 },
+                    { data: [10,18,14,16,20,22,6,4,8,16,18,20,10], color: '#b91c1c', width: 2, dotR: 3.5 }
+                  ]}
+                />
               </DashboardCard>
 
             </div>
