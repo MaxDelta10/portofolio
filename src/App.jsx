@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import MediaDashboard from './components/MediaDashboard';
 import { 
   Terminal, 
   User, 
@@ -59,7 +58,7 @@ const LinkedinIconSvg = ({ size = 20, className = '' }) => (
 );
 
 function App() {
-  const [view, setView] = useState('portfolio');
+
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [bootLines, setBootLines] = useState([]);
@@ -175,9 +174,6 @@ function App() {
       {/* Subtle CRT Overlay */}
       <div className={`scanline-overlay ${!scanlines ? 'off' : ''}`}></div>
 
-      {view === 'dashboard' ? (
-        <MediaDashboard onBack={() => setView('portfolio')} />
-      ) : (
         <div className="app-container fade-in">
           {/* Navigation Bar */}
         <nav className="nav-bar">
@@ -483,13 +479,15 @@ function App() {
                 )}
                 
                 <div style={{ marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <button 
-                    onClick={() => setView('dashboard')} 
+                  <a 
+                    href="https://media-intelligence-portofolio.netlify.app/" 
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="btn-primary" 
                     style={{ fontSize: '0.7rem', padding: '8px 16px', fontFamily: 'var(--font-pixel)' }}
                   >
-                    ENTER SYSTEM (DASHBOARD)
-                  </button>
+                    ENTER SYSTEM (DASHBOARD) <ExternalLink size={14} />
+                  </a>
                   <span className="project-level-badge" style={{ background: 'rgba(244, 63, 94, 0.1)', color: 'var(--accent-magenta)', borderColor: 'var(--accent-magenta)', height: 'fit-content' }}>PROPRIETARY SYSTEM</span>
                 </div>
               </div>
@@ -645,7 +643,6 @@ function App() {
           <p className="footer-retro">INSERT COIN TO CONTINUE • ALL RIGHTS RESERVED</p>
         </footer>
       </div>
-      )}
     </>
   );
 }
