@@ -257,7 +257,7 @@ function App() {
                 </div>
                 <div className="profile-stat-item">
                   <span className="profile-stat-name">WEAPONS</span>
-                  <span className="profile-stat-val">Python, Airflow, Elasticsearch, SQL</span>
+                  <span className="profile-stat-val">Python, SQL, Elasticsearch, PostgreSQL</span>
                 </div>
                 <div className="profile-stat-item">
                   <span className="profile-stat-name">LOCATION</span>
@@ -318,8 +318,7 @@ function App() {
                 <span style={{ color: 'var(--accent-gold)' }}>■</span> Data Engineering
               </h3>
               <div className="skill-pill-container">
-                <span className="skill-pill">Apache Airflow</span>
-                <span className="skill-pill">ETL Pipelines</span>
+                <span className="skill-pill">ETL Workflows</span>
                 <span className="skill-pill">Web Scraping</span>
                 <span className="skill-pill">Polars</span>
                 <span className="skill-pill">Pandas</span>
@@ -378,7 +377,7 @@ function App() {
                 </p>
                 <ul className="timeline-tasks">
                   <li className="timeline-task-item">
-                    Designed and optimized ETL pipelines processing millions of social media and news records daily using Apache Airflow and Elasticsearch.
+                    Designed and optimized ETL pipelines processing millions of social media and news records daily using Python and Elasticsearch.
                   </li>
                   <li className="timeline-task-item">
                     Developed high-performance scraping bots and data ingestion agents to pull real-time data from various platforms securely.
