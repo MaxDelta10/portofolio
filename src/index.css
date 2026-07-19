@@ -75,32 +75,7 @@ body {
   transition: background-color 0.3s, color 0.3s, background-image 0.3s;
 }
 
-/* Subtle CRT scanline overlay */
-.scanline-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.25) 50%
-  ), linear-gradient(
-    90deg,
-    rgba(255, 0, 0, 0.06),
-    rgba(0, 255, 0, 0.02),
-    rgba(0, 0, 255, 0.06)
-  );
-  background-size: 100% 4px, 6px 100%;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.15;
-  transition: opacity 0.3s;
-}
 
-.scanline-overlay.off {
-  opacity: 0 !important;
-}
 
 /* Main Layout Wrapper */
 .app-container {

@@ -12,7 +12,6 @@ import {
   ChevronUp,
   Moon,
   Sun,
-  Tv,
   Award,
   BookOpen,
   Send,
@@ -65,7 +64,6 @@ function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('theme') || 'dark';
   });
-  const [scanlines, setScanlines] = useState(true);
   const [expandedProject, setExpandedProject] = useState(null);
 
   // Form states
@@ -171,9 +169,6 @@ function App() {
 
   return (
     <>
-      {/* Subtle CRT Overlay */}
-      <div className={`scanline-overlay ${!scanlines ? 'off' : ''}`}></div>
-
       <div className="app-container fade-in">
         {/* Navigation Bar */}
         <nav className="nav-bar">
@@ -193,9 +188,6 @@ function App() {
 
             <button onClick={toggleTheme} className="control-btn" title="Toggle Theme" aria-label="Toggle Theme">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button onClick={() => setScanlines(!scanlines)} className="control-btn" title="Toggle CRT Filter" aria-label="Toggle CRT Filter">
-              <Tv size={18} style={{ color: scanlines ? 'var(--accent-cyan)' : 'inherit' }} />
             </button>
           </div>
         </nav>
