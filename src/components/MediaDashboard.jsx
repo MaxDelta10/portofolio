@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Monitor, Filter, Settings, Users, Clock, 
   ChevronDown, Calendar, Search, ExternalLink, RefreshCw, ArrowLeft,
-  TrendingUp, BarChart2, MessageSquare, ThumbsUp, Eye, Heart, Share2
+  TrendingUp, BarChart2, MessageSquare, ThumbsUp, Eye, Heart, Share2, FileText
 } from 'lucide-react';
 
 // Reusable SVG Donut Chart Component
@@ -241,7 +241,7 @@ export default function MediaDashboard({ onBack }) {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flexGrow: 1, width: '100%', alignItems: 'center' }}>
-          {/* Top monitor icon - Social Media */}
+          {/* Top icon - Social Media */}
           <button 
             onClick={() => setActiveTab('social')} 
             style={{ 
@@ -258,10 +258,10 @@ export default function MediaDashboard({ onBack }) {
             }} 
             title="Monitoring Social Media"
           >
-            <Monitor size={22} />
+            <MessageSquare size={22} />
           </button>
           
-          {/* Bottom monitor icon - Online News */}
+          {/* Bottom icon - Online News */}
           <button 
             onClick={() => setActiveTab('news')} 
             style={{ 
@@ -278,7 +278,7 @@ export default function MediaDashboard({ onBack }) {
             }} 
             title="Monitoring Online News"
           >
-            <Monitor size={22} />
+            <FileText size={22} />
           </button>
         </div>
 
