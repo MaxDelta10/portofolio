@@ -474,13 +474,33 @@ function App() {
                       <li className="project-feature-item">Engineered custom Elasticsearch aggregations reducing query execution latency by 40%.</li>
                       <li className="project-feature-item">Designed elegant skeleton screen loaders for a smooth, high-fidelity user experience.</li>
                     </ul>
+                    
+                    <h4 className="project-detail-title" style={{ marginTop: '20px' }}>Dashboard Overview & Analytics</h4>
+                    <div className="dashboard-screenshots-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '12px' }}>
+                      <div className="screenshot-wrapper-card" style={{ border: '2px solid var(--border-color)', padding: '8px', background: 'var(--card-hover)', borderRadius: '4px' }}>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--accent-cyan)', marginBottom: '8px', fontFamily: 'var(--font-pixel)' }}>[SYS_VIEW_01.PNG]</div>
+                        <img 
+                          src={`${import.meta.env.BASE_URL}dashboard_overview_1.png`} 
+                          alt="Media Intelligence Dashboard Page 1" 
+                          style={{ width: '100%', height: 'auto', border: '1px solid var(--border-color)', display: 'block', cursor: 'zoom-in' }} 
+                          onClick={() => window.open(`${import.meta.env.BASE_URL}dashboard_overview_1.png`, '_blank')}
+                        />
+                      </div>
+                      <div className="screenshot-wrapper-card" style={{ border: '2px solid var(--border-color)', padding: '8px', background: 'var(--card-hover)', borderRadius: '4px' }}>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--accent-cyan)', marginBottom: '8px', fontFamily: 'var(--font-pixel)' }}>[SYS_VIEW_02.PNG]</div>
+                        <img 
+                          src={`${import.meta.env.BASE_URL}dashboard_overview_2.png`} 
+                          alt="Media Intelligence Dashboard Page 2" 
+                          style={{ width: '100%', height: 'auto', border: '1px solid var(--border-color)', display: 'block', cursor: 'zoom-in' }} 
+                          onClick={() => window.open(`${import.meta.env.BASE_URL}dashboard_overview_2.png`, '_blank')}
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
                 
                 <div style={{ marginTop: '16px' }}>
-                  <a href="https://github.com/MaxDelta10" target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                    VIEW ON GITHUB <ExternalLink size={14} style={{ marginLeft: '4px' }} />
-                  </a>
+                  <span className="project-level-badge" style={{ background: 'rgba(244, 63, 94, 0.1)', color: 'var(--accent-magenta)', borderColor: 'var(--accent-magenta)' }}>PROPRIETARY SYSTEM</span>
                 </div>
               </div>
             </div>
