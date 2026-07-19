@@ -165,7 +165,7 @@ export default function MediaDashboard({ onBack }) {
       time: '6 minutes ago',
       title: 'BGN Kaji Skema Baru MBG, Siswa Desil 8-10 Berpotensi Tak Lagi Jadi Penerima Manfaat',
       avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=80&h=80&q=80',
-      content: 'Badan Gizi Nasional tengah mengkaji ulang kriteria penerima program Makan Bergizi Gratis agar penyaluran lebih tepat sasaran bagi siswa yang membutuhkan.'
+      content: 'Badan Gizi Nasional tengah mengkaji ulang kriteria penerima program Makan Bergizi Gratis agar penyaluran lebih tepat saran bagi siswa yang membutuhkan.'
     },
     {
       id: 3,
@@ -197,7 +197,7 @@ export default function MediaDashboard({ onBack }) {
   ];
 
   return (
-    <div style={{
+    <div className="media-intelligence-dashboard-wrapper" style={{
       display: 'flex',
       minHeight: '100vh',
       backgroundColor: '#f8fafc',
@@ -205,6 +205,13 @@ export default function MediaDashboard({ onBack }) {
       color: '#0f172a',
       width: '100vw'
     }}>
+      <style>{`
+        /* Protect Dashboard component from parent project retro font overriding */
+        .media-intelligence-dashboard-wrapper,
+        .media-intelligence-dashboard-wrapper * {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+      `}</style>
       
       {/* SIDEBAR */}
       <aside style={{
@@ -838,7 +845,7 @@ export default function MediaDashboard({ onBack }) {
               </DashboardCard>
 
               {/* Emotion by Engagement */}
-              <DashboardCard title="Emotion By Engagement" subtitle="Displays emotional tone segmented by engagement level..." source="Social Media">
+              <DashboardCard title="Emotion by Engagement" subtitle="Displays emotional tone segmented by engagement level..." source="Social Media">
                 <DonutChart data={socialEmotionEngagement} />
               </DashboardCard>
 
