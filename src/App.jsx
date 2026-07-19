@@ -146,7 +146,7 @@ function App() {
     return (
       <div className="boot-screen">
         <div className="boot-content">
-          <div className="boot-title">💾 YUSRA SAKTI PORTFOLIO</div>
+          <div className="boot-title">💾 YUSRA SAKTI WARDHANA PORTOFOLIO</div>
           <div className="boot-lines">
             {bootLines.map((line, idx) => (
               <div key={idx} className="boot-line">
@@ -203,7 +203,7 @@ function App() {
         <header className="hero-section">
           <div className="avatar-wrapper">
             <div className="avatar-image-container">
-              <img src="/avatar.png" alt="Yusra Sakti Wardhana avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={`${import.meta.env.BASE_URL}avatar.png`} alt="Yusra Sakti Wardhana avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
           <span className="hero-badge">PLAYER LEVEL 25</span>
@@ -592,13 +592,13 @@ function App() {
             </div>
 
             <div className="contact-info-panel">
-              <a href="mailto:yusrasaktiw@gmail.com" className="info-item">
+              <a href="mailto:sakti.wardhana10@gmail.com" className="info-item">
                 <div className="info-icon-box">
                   <Mail size={18} />
                 </div>
                 <div className="info-details">
                   <div className="info-label">Email</div>
-                  <div className="info-val">yusrasaktiw@gmail.com</div>
+                  <div className="info-val">sakti.wardhana10@gmail.com</div>
                 </div>
               </a>
 
@@ -623,7 +623,7 @@ function App() {
               </a>
 
               {/* Save Game (Resume Download) */}
-              <a href="/resume.pdf" download className="btn-primary" style={{ marginTop: '10px' }}>
+              <a href={`${import.meta.env.BASE_URL}resume.pdf`} download className="btn-primary" style={{ marginTop: '10px' }}>
                 DOWNLOAD RESUME <Download size={16} />
               </a>
             </div>

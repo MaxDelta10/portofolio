@@ -52,6 +52,10 @@
   --shadow-retro-gold: 4px 4px 0px var(--accent-gold);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -355,7 +359,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.85rem;
   color: var(--text-primary);
   margin-bottom: 16px;
-  text-align: justify;
+  text-align: left;
 }
 
 .profile-stats-list {
