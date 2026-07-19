@@ -1,315 +1,184 @@
 import React, { useState } from 'react';
 import { 
-  ArrowLeft, 
-  Tv, 
-  Share2, 
-  TrendingUp, 
-  Users, 
-  MessageSquare, 
-  Heart, 
-  Calendar,
-  Grid,
-  FileText,
-  Settings,
-  MoreVertical,
-  HelpCircle,
-  ExternalLink,
-  ChevronDown
+  ArrowLeft, Search, Filter, Monitor, Share2, 
+  Settings, Users, ChevronDown, CheckCircle, Clock, Link2
 } from 'lucide-react';
 
+const DashboardCard = ({ title, subtitle, source, children, style, contentStyle }) => (
+  <div style={{ 
+    backgroundColor: '#ffffff', 
+    border: '1px solid #e5e7eb', 
+    borderRadius: '6px', 
+    display: 'flex', 
+    flexDirection: 'column', 
+    boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+    ...style 
+  }}>
+    <div style={{ padding: '16px', flexGrow: 1, display: 'flex', flexDirection: 'column', ...contentStyle }}>
+      <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#111827' }}>{title}</h3>
+      {subtitle && <p style={{ margin: '4px 0 16px 0', fontSize: '12px', color: '#6b7280' }}>{subtitle}</p>}
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        {children}
+      </div>
+    </div>
+    {source && (
+      <div style={{ 
+        padding: '10px 16px', 
+        borderTop: '1px solid #e5e7eb', 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '6px', 
+        fontSize: '12px', 
+        color: '#6b7280' 
+      }}>
+        <Link2 size={14} />
+        Source: {source}
+      </div>
+    )}
+  </div>
+);
+
 export default function MediaDashboard({ onBack }) {
-  const [currentPage, setCurrentPage] = useState('news'); // 'news' (News IMA) or 'social' (Social Media ISA)
+  const [currentPage, setCurrentPage] = useState('news');
   const [activeSubTab, setActiveSubTab] = useState('Overview');
-  const [selectedArticleId, setSelectedArticleId] = useState(1);
 
-  // Common dates and layout options
-  const subTabs = ['Overview', 'Sentiment', 'Top Person', 'Top Organization', 'Top Media', 'Performance', 'Top Keywords', 'Recent News'];
-
-  // Word Clouds
-  const newsKeywords = [
-    { text: 'langkah strategis', size: '28px', color: '#1e40af', weight: 'bold' },
-    { text: 'kesejahteraan masyarakat', size: '24px', color: '#0f766e', weight: 'bold' },
-    { text: 'manfaat bagi masyarakat', size: '22px', color: '#b45309', weight: '700' },
-    { text: 'IKN Nusantara', size: '20px', color: '#0369a1', weight: 'bold' },
-    { text: 'pembangunan infrastruktur', size: '18px', color: '#4338ca', weight: '600' },
-    { text: 'ekonomi nasional', size: '16px', color: '#15803d', weight: 'bold' },
-    { text: 'sidang paripurna', size: '15px', color: '#be185d', weight: '500' },
-    { text: 'KPK RI', size: '14px', color: '#b91c1c', weight: 'bold' }
-  ];
-
-  const socialKeywords = [
-    { text: 'kawalkeputusan', size: '26px', color: '#2563eb', weight: '900' },
-    { text: 'world cup', size: '22px', color: '#d97706', weight: 'bold' },
-    { text: 'trump calling', size: '20px', color: '#dc2626', weight: 'bold' },
-    { text: 'live camera', size: '18px', color: '#059669', weight: '600' },
-    { text: 'IndonesiaMaju', size: '16px', color: '#0891b2', weight: 'bold' },
-    { text: 'PilkadaDamai', size: '15px', color: '#7c3aed', weight: '500' }
-  ];
-
-  // News IMA articles list (Grid + preview)
-  const newsArticles = [
-    {
-      id: 1,
-      title: "Rapat Paripurna DPR RI Ke-15 Menyetujui RUU Pertanahan Menjadi UU",
-      source: "Detik News",
-      time: "15 mins ago",
-      sentiment: "Positive",
-      image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=500&auto=format&fit=crop&q=60",
-      desc: "DPR RI secara resmi menyetujui RUU Pertanahan dalam sidang paripurna hari ini. Keputusan ini dinilai sangat strategis untuk kepastian hukum pembangunan dan investasi infrastruktur nasional khususnya di wilayah IKN Nusantara guna mendukung pertumbuhan ekonomi berkelanjutan.",
-      author: "Aditya Wijaya",
-      exposure: "1.2B Reach"
-    },
-    {
-      id: 2,
-      title: "Pertemuan Prabowo Subianto dengan Presiden Membahas Transisi Pemerintahan",
-      source: "Kompas",
-      time: "1 hour ago",
-      sentiment: "Positive",
-      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=500&auto=format&fit=crop&q=60",
-      desc: "Pertemuan hangat berlangsung di Istana Kepresidenan Bogor membahas transisi program strategis nasional serta stabilitas ekonomi makro di tengah ketidakpastian geopolitik global.",
-      author: "Rian Septian",
-      exposure: "980M Reach"
-    },
-    {
-      id: 3,
-      title: "Bawaslu Temukan Indikasi Pelanggaran Administrasi Pemilu di Beberapa Daerah",
-      source: "Tempo",
-      time: "3 hours ago",
-      sentiment: "Negative",
-      image: "https://images.unsplash.com/photo-1505664194779-8bebcb95c539?w=500&auto=format&fit=crop&q=60",
-      desc: "Bawaslu telah mencatat laporan pelanggaran administrasi dalam proses pendaftaran calon kepala daerah dan menyerahkan berkas evaluasi komprehensif ke KPU.",
-      author: "Linda Lestari",
-      exposure: "540M Reach"
-    },
-    {
-      id: 4,
-      title: "KPK Menggelar Sosialisasi Antikorupsi untuk Aparatur Sipil Negara (ASN)",
-      source: "Tribun News",
-      time: "4 hours ago",
-      sentiment: "Neutral",
-      image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=500&auto=format&fit=crop&q=60",
-      desc: "Upaya pencegahan korupsi terus diintensifkan dengan menggelar bimbingan teknis integritas bagi jajaran pejabat tinggi pratama di tingkat kementerian dan lembaga.",
-      author: "Humas KPK",
-      exposure: "320M Reach"
-    }
-  ];
-
-  // Social Media ISA posts
-  const socialPosts = [
-    {
-      id: 1,
-      author: "Yusra Sakti W.",
-      handle: "@sakti_w10",
-      platform: "Twitter",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60",
-      desc: "Pembangunan IKN Nusantara bukan sekadar pemindahan gedung pemerintahan saja, melainkan langkah besar pemerataan ekonomi dan transformasi teknologi menuju Indonesia Emas 2045! 🇮🇩✨ #IKNNusantara #IndonesiaMaju",
-      sentiment: "Positive",
-      emotion: "Joy",
-      likes: "1,250",
-      comments: "45",
-      views: "12.4K"
-    },
-    {
-      id: 2,
-      author: "Humas Kemenko",
-      handle: "@kemendagri",
-      platform: "Facebook",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=60",
-      desc: "Kementerian Dalam Negeri kembali menegaskan kesiapan seluruh aparatur daerah dalam menyambut proses pendaftaran pilkada serentak secara tertib, aman, dan mematuhi regulasi administrasi yang berlaku.",
-      sentiment: "Neutral",
-      emotion: "Anticipation",
-      likes: "890",
-      comments: "12",
-      views: "5.6K"
-    },
-    {
-      id: 3,
-      author: "Netizen Kritik",
-      handle: "@kritik_publik",
-      platform: "Instagram",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=60",
-      desc: "Harga beras dan beberapa komoditas pokok terpantau masih tinggi di pasar tradisional. Operasi pasar murah dinilai belum merata dan kurang efektif menjangkau masyarakat kecil.",
-      sentiment: "Negative",
-      emotion: "Sadness",
-      likes: "2,430",
-      comments: "189",
-      views: "45.2K"
-    }
-  ];
-
-  const selectedArticle = newsArticles.find(art => art.id === selectedArticleId) || newsArticles[0];
+  const newsSubTabs = ['Overview', 'Sentimen', 'Top Person', 'Top Organization', 'Top Media', 'Top Influencer', 'Top Keywords', 'Maps', 'Gallery', 'Source News', 'Compare Issue'];
+  const socialSubTabs = ['Overview', 'Engagement', 'Top Contributors', 'Audience Insights', 'Sentiment Analysis', 'Emotion Trend', 'Monitoring Akun', 'Maps', 'Chronology', 'Compare Issue'];
+  const subTabs = currentPage === 'news' ? newsSubTabs : socialSubTabs;
 
   return (
     <div className="modern-dashboard-theme" style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f0f2f5',
-      color: '#334155',
+      backgroundColor: '#f3f4f6', // Light gray background
+      fontFamily: '"Inter", "Segoe UI", sans-serif',
+      color: '#111827',
       width: '100vw',
       maxWidth: '100%',
       overflowX: 'hidden'
     }}>
       {/* SIDEBAR */}
       <aside style={{
-        width: '60px',
+        width: '64px',
         backgroundColor: '#ffffff',
-        borderRight: '1px solid #e2e8f0',
+        borderRight: '1px solid #e5e7eb',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         padding: '16px 0',
-        flexShrink: 0
+        flexShrink: 0,
+        zIndex: 10
       }}>
-        {/* MI Logo */}
+        {/* MI Logo placeholder */}
         <div style={{
-          width: '36px',
-          height: '36px',
+          width: '32px',
+          height: '32px',
+          backgroundColor: '#3b82f6',
           borderRadius: '8px',
-          backgroundColor: '#2563eb',
+          clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 75% 100%, 0% 100%)',
+          marginBottom: '24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#ffffff',
-          fontWeight: '900',
-          fontSize: '0.95rem',
-          marginBottom: '32px'
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '12px'
         }}>
-          MI
+          mi
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flexGrow: 1 }}>
-          <button 
-            onClick={() => setCurrentPage('news')} 
-            style={{ 
-              background: currentPage === 'news' ? '#eff6ff' : 'none', 
-              border: 'none', 
-              color: currentPage === 'news' ? '#2563eb' : '#64748b', 
-              cursor: 'pointer', 
-              padding: '10px', 
-              borderRadius: '6px' 
-            }} 
-            title="News IMA"
-          >
-            <Tv size={18} />
-          </button>
-          <button 
-            onClick={() => setCurrentPage('social')} 
-            style={{ 
-              background: currentPage === 'social' ? '#eff6ff' : 'none', 
-              border: 'none', 
-              color: currentPage === 'social' ? '#2563eb' : '#64748b', 
-              cursor: 'pointer', 
-              padding: '10px', 
-              borderRadius: '6px' 
-            }} 
-            title="Social Media ISA"
-          >
-            <Share2 size={18} />
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flexGrow: 1, width: '100%', alignItems: 'center' }}>
+          <button style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '10px' }} title="Home"><Monitor size={20} /></button>
+          
+          {/* Active indicator logic for tabs */}
+          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+            {currentPage === 'news' && <div style={{ position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '3px', backgroundColor: '#3b82f6', borderRadius: '0 4px 4px 0' }} />}
+            <button 
+              onClick={() => setCurrentPage('news')} 
+              style={{ 
+                background: currentPage === 'news' ? '#eff6ff' : 'none', 
+                border: 'none', 
+                color: currentPage === 'news' ? '#3b82f6' : '#6b7280', 
+                cursor: 'pointer', 
+                padding: '10px', 
+                borderRadius: '8px' 
+              }} 
+            >
+              <Monitor size={20} />
+            </button>
+          </div>
+
+          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+            {currentPage === 'social' && <div style={{ position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '3px', backgroundColor: '#3b82f6', borderRadius: '0 4px 4px 0' }} />}
+            <button 
+              onClick={() => setCurrentPage('social')} 
+              style={{ 
+                background: currentPage === 'social' ? '#eff6ff' : 'none', 
+                border: 'none', 
+                color: currentPage === 'social' ? '#3b82f6' : '#6b7280', 
+                cursor: 'pointer', 
+                padding: '10px', 
+                borderRadius: '8px' 
+              }} 
+            >
+              <Share2 size={20} />
+            </button>
+          </div>
         </div>
 
-        <button onClick={onBack} style={{
-          background: 'none',
-          border: 'none',
-          color: '#ef4444',
-          cursor: 'pointer',
-          padding: '8px',
-          marginTop: 'auto'
-        }} title="Exit Workspace">
-          <ArrowLeft size={18} />
+        {/* Exit & Profile */}
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '10px', marginBottom: '16px' }} title="Back">
+          <ArrowLeft size={20} />
         </button>
+        <div style={{
+          width: '32px',
+          height: '32px',
+          borderRadius: '50%',
+          backgroundColor: '#8b5cf6',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '12px',
+          fontWeight: 'bold'
+        }}>
+          SU
+        </div>
       </aside>
 
       {/* MAIN CONTAINER */}
       <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0 }}>
-        {/* HEADER BAR */}
-        <header style={{
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '0 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          flexShrink: 0
-        }}>
-          {/* Top Row */}
-          <div style={{
-            height: '56px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <div style={{ display: 'flex', gap: '20px', height: '100%', alignItems: 'center' }}>
-              <button 
-                onClick={() => setCurrentPage('news')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  height: '100%',
-                  fontSize: '0.9rem',
-                  fontWeight: currentPage === 'news' ? '700' : '500',
-                  color: currentPage === 'news' ? '#2563eb' : '#64748b',
-                  borderBottom: currentPage === 'news' ? '3px solid #2563eb' : '3px solid transparent',
-                  cursor: 'pointer',
-                  padding: '0 4px'
-                }}
-              >
-                News Media (News IMA)
-              </button>
-              <button 
-                onClick={() => setCurrentPage('social')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  height: '100%',
-                  fontSize: '0.9rem',
-                  fontWeight: currentPage === 'social' ? '700' : '500',
-                  color: currentPage === 'social' ? '#2563eb' : '#64748b',
-                  borderBottom: currentPage === 'social' ? '3px solid #2563eb' : '3px solid transparent',
-                  cursor: 'pointer',
-                  padding: '0 4px'
-                }}
-              >
-                Social Media (Social Media ISA)
-              </button>
+        
+        {/* TOP HEADER */}
+        <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', padding: '20px 24px 0 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <div>
+              <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '700' }}>Overview</h1>
+              <div style={{ fontSize: '13px', color: '#6b7280', display: 'flex', gap: '6px' }}>
+                <span style={{ color: '#9ca3af' }}>{currentPage === 'news' ? 'News Media' : 'Social Media'}</span>
+                <span>&gt;</span>
+                <span style={{ color: '#374151' }}>Overview</span>
+              </div>
             </div>
-
-            <button onClick={onBack} style={{
-              backgroundColor: '#ef4444',
-              color: '#ffffff',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}>
-              <ArrowLeft size={14} /> Back to Portfolio
+            <button style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+              <Search size={20} />
             </button>
           </div>
 
-          {/* Sub-tabs Row */}
-          <div style={{
-            display: 'flex',
-            gap: '16px',
-            overflowX: 'auto',
-            borderTop: '1px solid #f1f5f9',
-            padding: '8px 0'
-          }}>
+          {/* Sub-tabs */}
+          <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', paddingBottom: '0' }}>
             {subTabs.map(tab => (
               <button 
                 key={tab}
                 onClick={() => setActiveSubTab(tab)}
                 style={{
-                  background: activeSubTab === tab ? '#eff6ff' : 'none',
+                  background: 'none',
                   border: 'none',
-                  padding: '4px 10px',
-                  borderRadius: '16px',
-                  fontSize: '0.75rem',
-                  fontWeight: activeSubTab === tab ? '600' : '500',
-                  color: activeSubTab === tab ? '#2563eb' : '#64748b',
+                  padding: '0 0 12px 0',
+                  fontSize: '14px',
+                  fontWeight: activeSubTab === tab ? '600' : '400',
+                  color: activeSubTab === tab ? '#2563eb' : '#4b5563',
+                  borderBottom: activeSubTab === tab ? '3px solid #2563eb' : '3px solid transparent',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap'
                 }}
@@ -321,575 +190,258 @@ export default function MediaDashboard({ onBack }) {
         </header>
 
         {/* WORKSPACE BODY */}
-        <main style={{
-          padding: '20px',
-          overflowY: 'auto',
-          flexGrow: 1
-        }}>
-          {/* Filter Bar */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            backgroundColor: '#ffffff',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            border: '1px solid #e2e8f0',
-            marginBottom: '20px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
-              <span style={{ color: '#64748b' }}>Day:</span>
-              <select style={{ border: '1px solid #cbd5e1', borderRadius: '4px', padding: '2px 6px' }}>
-                <option>7</option>
-                <option>14</option>
-                <option>30</option>
-              </select>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
-              <span style={{ color: '#64748b' }}>Content:</span>
-              <select style={{ border: '1px solid #cbd5e1', borderRadius: '4px', padding: '2px 6px' }}>
-                <option>All Content</option>
-              </select>
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.75rem',
-              color: '#475569',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              padding: '3px 8px',
-              borderRadius: '4px'
-            }}>
-              <Calendar size={12} />
-              <span>16 Jul 2026 00:00 AM - 22 Jul 2026 11:59 PM</span>
-            </div>
+        <main style={{ padding: '24px', overflowY: 'auto', flexGrow: 1 }}>
+          
+          {/* FILTER BAR */}
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#334155', cursor: 'pointer' }}>
+              Filter <span style={{ backgroundColor: '#bfdbfe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{currentPage === 'news' ? '2' : '4'}</span> <ChevronDown size={14} />
+            </button>
+            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#0369a1', cursor: 'pointer' }}>
+              <Settings size={14} /> General <ChevronDown size={14} />
+            </button>
+            {currentPage === 'social' && (
+              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#0369a1', cursor: 'pointer' }}>
+                <Users size={14} /> Account Not Found <ChevronDown size={14} />
+              </button>
+            )}
+            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#0369a1', cursor: 'pointer' }}>
+              <Clock size={14} /> 18 Jul 26, 13:34 - 19 Jul 26, 13:34
+            </button>
+            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#334155', cursor: 'pointer' }}>
+              Platform <span style={{ backgroundColor: '#bfdbfe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{currentPage === 'news' ? '3' : '6'}</span>
+            </button>
           </div>
 
-          {/* PAGE 1: NEWS MEDIA (NEWS IMA) */}
+          {/* PAGE 1: NEWS MEDIA (News IMA) */}
           {currentPage === 'news' && (
-            <div className="fade-in">
-              {/* Row 1: Exposure Trend (Full Width) */}
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Exposure Trend</h4>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                
-                <div style={{ width: '100%', height: '180px' }}>
-                  <svg viewBox="0 0 600 160" style={{ width: '100%', height: '100%', display: 'block' }}>
-                    <line x1="30" y1="20" x2="570" y2="20" stroke="#f1f5f9" />
-                    <line x1="30" y1="70" x2="570" y2="70" stroke="#f1f5f9" />
-                    <line x1="30" y1="120" x2="570" y2="120" stroke="#cbd5e1" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Exposure Trend */}
+              <DashboardCard 
+                title="Exposure Trend" 
+                subtitle="Displays the trend in exposure, indicating the volume of news coverage published by mainstream media over time."
+                source="Mainstream Media"
+              >
+                <div style={{ width: '100%', height: '220px', position: 'relative', marginTop: '20px' }}>
+                  <svg viewBox="0 0 800 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                    {/* Grid lines */}
+                    {[0, 50, 100, 150, 200].map(y => (
+                      <g key={y}>
+                        <line x1="40" y1={y} x2="800" y2={y} stroke="#f3f4f6" />
+                        <text x="30" y={200 - y + 4} fill="#9ca3af" fontSize="10" textAnchor="end">{y === 0 ? '0' : y === 200 ? '3K' : y === 150 ? '2,5K' : y === 100 ? '1,5K' : '1K'}</text>
+                      </g>
+                    ))}
                     
-                    {/* Bars representing Mainstream Media volume */}
-                    {[45, 60, 75, 80, 70, 85, 95, 90, 80, 88, 92, 110, 100, 95, 85, 75, 65, 80, 90, 85].map((val, idx) => {
-                      const barWidth = 18;
-                      const gap = 8;
-                      const x = 35 + idx * (barWidth + gap);
-                      const height = (val / 130) * 100;
-                      const y = 120 - height;
+                    {/* Bars */}
+                    {[300, 2200, 2300, 1900, 2100, 2000, 1600, 1800, 1600, 1100, 800, 200, 100, 400, 200, 300, 400, 700, 1000, 1200, 1100, 1300, 1400, 1300, 600].map((val, i) => {
+                      const h = (val / 3000) * 200;
                       return (
-                        <rect key={idx} x={x} y={y} width={barWidth} height={height} fill="#1e3a8a" rx="1.5" />
+                        <rect key={i} x={50 + i * 30} y={200 - h} width="12" height={h} fill="#1e3a8a" />
                       );
                     })}
+                    {/* X axis labels */}
+                    {['13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00'].map((time, i) => (
+                      <text key={i} x={56 + i * 30} y="220" fill="#9ca3af" fontSize="10" textAnchor="middle">{time}</text>
+                    ))}
                   </svg>
                 </div>
-              </div>
+              </DashboardCard>
 
-              {/* Row 2: Total News KPI (Full Width) */}
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Total News</h4>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px' }}>🔗 Source: Mainstream Media</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a' }}>34.258</span>
-                  <span style={{ color: '#2563eb', fontSize: '0.8rem', fontWeight: '700' }}>[↗]</span>
+              {/* Total News */}
+              <DashboardCard style={{ padding: '0' }} contentStyle={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>Total News</div>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold' }}>34.212</div>
                 </div>
-              </div>
+                <div style={{ backgroundColor: '#eff6ff', padding: '6px', borderRadius: '4px', color: '#3b82f6' }}>
+                  <TrendingUp size={16} />
+                </div>
+              </DashboardCard>
 
-              {/* Row 3: Sentiment Proportion & Sentiment Distribution */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 2fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Sentiment Proportion</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '16px' }}>🔗 Source: Mainstream Media</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
-                    <div style={{ width: '80px', height: '80px' }}>
+              {/* Sentiment Proportion & Distribution */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
+                <DashboardCard title="Sentiment Proportion" subtitle="Displays the proportion of positive, negative, and neutral" source="Mainstream Media">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '20px', height: '180px' }}>
+                    <div style={{ width: '160px', height: '160px', position: 'relative' }}>
                       <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#2563eb" strokeWidth="4.5" strokeDasharray="45 55" />
-                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#475569" strokeWidth="4.5" strokeDasharray="34 66" strokeDashoffset="-45" />
-                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#ef4444" strokeWidth="4.5" strokeDasharray="21 79" strokeDashoffset="-79" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#e5e7eb" strokeWidth="6" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#dc2626" strokeWidth="6" strokeDasharray="20 100" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#4b5563" strokeWidth="6" strokeDasharray="34 100" strokeDashoffset="-20" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#1d4ed8" strokeWidth="6" strokeDasharray="46 100" strokeDashoffset="-54" />
                       </svg>
                     </div>
-                    <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ color: '#2563eb' }}>● Positive (45.47%)</span>
-                      <span style={{ color: '#475569' }}>● Neutral (34.32%)</span>
-                      <span style={{ color: '#ef4444' }}>● Negative (20.21%)</span>
+                    <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#1d4ed8' }}></div> Positive (15,53K)</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#4b5563' }}></div> Neutral (11,78K)</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#dc2626' }}></div> Negative (6,91K)</div>
                     </div>
                   </div>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Sentiment Distribution</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                  <div style={{ width: '100%', height: '110px' }}>
-                    <svg viewBox="0 0 400 100" style={{ width: '100%', height: '100%', display: 'block' }}>
-                      {/* Positive Line */}
-                      <path d="M 10 30 Q 80 15, 150 40 T 290 20 T 390 10" fill="none" stroke="#2563eb" strokeWidth="2" />
-                      {/* Neutral Line */}
-                      <path d="M 10 50 Q 80 35, 150 50 T 290 40 T 390 30" fill="none" stroke="#475569" strokeWidth="2" />
-                      {/* Negative Line */}
-                      <path d="M 10 80 Q 80 65, 150 80 T 290 70 T 390 60" fill="none" stroke="#ef4444" strokeWidth="2" />
+                </DashboardCard>
+                
+                <DashboardCard title="Sentiment Distribution" subtitle="Displays the trend in sentiment over time within mainstream media reporting." source="Mainstream Media">
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '10px', fontSize: '12px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#dc2626' }}></div> Negative</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}></div> Neutral</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#1d4ed8' }}></div> Positive</span>
+                  </div>
+                  <div style={{ width: '100%', height: '180px', position: 'relative' }}>
+                    <svg viewBox="0 0 600 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                      {[0, 37.5, 75, 112.5, 150].map(y => (
+                        <line key={y} x1="30" y1={y} x2="600" y2={y} stroke="#f3f4f6" />
+                      ))}
+                      {/* Lines & Points - Blue/Positive */}
+                      <path d="M 40 120 L 70 40 L 100 20 L 130 50 L 160 40 L 190 100 L 220 60 L 250 70 L 280 110 L 310 130 L 340 140 L 370 120 L 400 130 L 430 130 L 460 110 L 490 80 L 520 90 L 550 40 L 580 60" fill="none" stroke="#1d4ed8" strokeWidth="2" />
+                      {/* Grey/Neutral */}
+                      <path d="M 40 130 L 70 70 L 100 70 L 130 90 L 160 70 L 190 70 L 220 80 L 250 90 L 280 120 L 310 140 L 340 130 L 370 140 L 400 120 L 430 140 L 460 120 L 490 70 L 520 60 L 550 80 L 580 100" fill="none" stroke="#4b5563" strokeWidth="2" />
+                      {/* Red/Negative */}
+                      <path d="M 40 140 L 70 80 L 100 90 L 130 90 L 160 80 L 190 90 L 220 80 L 250 110 L 280 110 L 310 145 L 340 140 L 370 145 L 400 140 L 430 130 L 460 110 L 490 120 L 520 120 L 550 120 L 580 140" fill="none" stroke="#dc2626" strokeWidth="2" />
                     </svg>
                   </div>
-                </div>
+                </DashboardCard>
               </div>
 
-              {/* Row 4: Sentiment Target (Full Width) */}
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Sentiment Target</h4>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                
-                {/* Vertical Stacked Bar Chart for Entities */}
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', height: '140px', paddingBottom: '20px' }}>
-                  {['Masyarakat', 'Pemerintah', 'Indonesia', 'Bawaslu', 'DPR RI'].map((label, idx) => {
-                    const vals = [[40, 30, 30], [50, 20, 30], [60, 25, 15], [30, 40, 30], [25, 35, 40]][idx];
+              {/* Sentiment Target */}
+              <DashboardCard title="Sentiment Target" subtitle="Displays sentiment target in mainstream media coverage." source="Mainstream Media">
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '20px', fontSize: '12px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#dc2626' }}></div> Negative</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#4b5563' }}></div> Neutral</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#1d4ed8' }}></div> Positive</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', height: '160px', paddingBottom: '20px' }}>
+                  {['Tni', 'Fifa', 'Prabowo', 'Donald Trump', 'Polri', 'Messi', 'Dpr', 'Epstein'].map((name, i) => {
+                    const hBlue = [40, 20, 20, 15, 10, 5, 5, 2][i];
+                    const hGrey = [40, 30, 20, 20, 15, 5, 5, 2][i];
+                    const hRed  = [20, 10, 10, 5, 5, 2, 2, 1][i];
                     return (
-                      <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'flex-end' }}>
-                        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ height: `${vals[0]}%`, backgroundColor: '#2563eb' }}></div>
-                          <div style={{ height: `${vals[1]}%`, backgroundColor: '#475569' }}></div>
-                          <div style={{ height: `${vals[2]}%`, backgroundColor: '#ef4444' }}></div>
-                        </div>
-                        <span style={{ fontSize: '0.7rem', textAlign: 'center', marginTop: '6px', color: '#64748b' }}>{label}</span>
+                      <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30px' }}>
+                        <div style={{ width: '16px', height: `${hBlue}px`, backgroundColor: '#1d4ed8' }}></div>
+                        <div style={{ width: '16px', height: `${hGrey}px`, backgroundColor: '#4b5563' }}></div>
+                        <div style={{ width: '16px', height: `${hRed}px`, backgroundColor: '#dc2626' }}></div>
+                        <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '8px', textAlign: 'center' }}>{name}</div>
                       </div>
-                    );
+                    )
                   })}
                 </div>
-              </div>
+              </DashboardCard>
 
-              {/* Row 5: Top Person & Top Keywords */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Person</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
-                    <tbody>
-                      {[['Prabowo Subianto', '4,230 Exposure'], ['Joko Widodo', '3,950 Exposure'], ['Gibran Rakabuming', '2,890 Exposure']].map((row, idx) => (
-                        <tr key={row[0]} style={{ borderBottom: '1px dashed #e2e8f0' }}>
-                          <td style={{ padding: '8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold' }}>{idx+1}</div>
-                            <span style={{ fontWeight: '600' }}>{row[0]}</span>
-                          </td>
-                          <td style={{ padding: '8px 0', textAlign: 'right', color: '#64748b' }}>{row[1]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Keywords</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignContent: 'center', justifyContent: 'center', flexGrow: 1 }}>
-                    {newsKeywords.map(k => (
-                      <span key={k.text} style={{ fontSize: k.size, color: k.color, fontWeight: k.weight }}>{k.text}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 6: Top Influencer & Influencer Statements */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Influencer News</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.75rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: '600' }}>1. Humas Kemenko</span>
-                      <span style={{ color: '#2563eb', fontWeight: '700' }}>340 Statements</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: '600' }}>2. Bawaslu Press</span>
-                      <span style={{ color: '#2563eb', fontWeight: '700' }}>289 Statements</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Influencers Statements News</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.75rem' }}>
-                    <div style={{ border: '1px solid #f1f5f9', padding: '8px', borderRadius: '6px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <span style={{ fontWeight: '700' }}>@kemendagri</span>
-                        <span style={{ fontSize: '0.65rem', backgroundColor: '#d1fae5', color: '#065f46', padding: '1px 6px', borderRadius: '3px' }}>Positive</span>
-                      </div>
-                      <p style={{ margin: 0, color: '#475569' }}>"RUU Pertanahan yang baru disahkan menjamin legalitas hak atas tanah pembangunan IKN Nusantara."</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 7: Top Media Outlets & Top News Location */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Media Outlets</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
-                    <tbody>
-                      {[['Detik News', '1,240 articles'], ['Kompas', '980 articles'], ['Tempo', '750 articles']].map(row => (
-                        <tr key={row[0]} style={{ borderBottom: '1px dashed #e2e8f0' }}>
-                          <td style={{ padding: '8px 0', fontWeight: '600' }}>{row[0]}</td>
-                          <td style={{ padding: '8px 0', textAlign: 'right', color: '#64748b' }}>{row[1]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top News Location</h4>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Mainstream Media</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {[['Jawa Barat', 85], ['Jawa Timur', 70], ['DKI Jakarta', 65]].map(loc => (
-                      <div key={loc[0]} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem' }}>
-                        <span style={{ width: '80px', fontWeight: '600' }}>{loc[0]}</span>
-                        <div style={{ flexGrow: 1, height: '8px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                          <div style={{ width: `${loc[1]}%`, height: '100%', backgroundColor: '#b91c1c' }}></div>
-                        </div>
-                        <span style={{ width: '30px', color: '#64748b' }}>{loc[1]}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 8: Latest News (Interactive Split Grid Panel) */}
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Latest News</h4>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '16px' }}>🔗 Source: Mainstream Media</div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
-                  {/* Left Side: Article Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    {newsArticles.map(art => (
-                      <div 
-                        key={art.id} 
-                        onClick={() => setSelectedArticleId(art.id)}
-                        style={{
-                          border: selectedArticleId === art.id ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                          borderRadius: '6px',
-                          padding: '10px',
-                          backgroundColor: '#fafafa',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          height: '110px'
-                        }}
-                      >
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: '700', color: '#2563eb' }}>{art.source}</span>
-                            <span style={{ color: '#94a3b8' }}>{art.time}</span>
-                          </div>
-                          <h5 style={{ fontSize: '0.75rem', fontWeight: '700', margin: 0, lineClamp: 2, WebkitLineClamp: 2, display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{art.title}</h5>
-                        </div>
-                        <span style={{
-                          fontSize: '0.6rem',
-                          alignSelf: 'flex-start',
-                          fontWeight: '700',
-                          padding: '1px 6px',
-                          borderRadius: '3px',
-                          backgroundColor: art.sentiment === 'Positive' ? '#d1fae5' : art.sentiment === 'Negative' ? '#fee2e2' : '#f1f5f9',
-                          color: art.sentiment === 'Positive' ? '#065f46' : art.sentiment === 'Negative' ? '#991b1b' : '#334155'
-                        }}>{art.sentiment}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Right Side: Active Preview Card */}
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <img src={selectedArticle.image} alt="Preview" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '6px' }} />
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#64748b', marginBottom: '4px' }}>
-                        <span>Author: **{selectedArticle.author}**</span>
-                        <span>{selectedArticle.exposure}</span>
-                      </div>
-                      <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a', margin: '0 0 6px 0' }}>{selectedArticle.title}</h4>
-                      <p style={{ fontSize: '0.75rem', color: '#475569', margin: '0 0 8px 0', lineHeight: '1.4' }}>{selectedArticle.desc}</p>
-                      <button style={{ backgroundColor: '#2563eb', color: '#ffffff', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700', cursor: 'pointer' }}>Read Full Article</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* PAGE 2: SOCIAL MEDIA (SOCIAL MEDIA ISA) */}
+          {/* PAGE 2: SOCIAL MEDIA (Social Media ISA) */}
           {currentPage === 'social' && (
-            <div className="fade-in">
-              {/* Row 1: KPI Stats */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '20px',
-                marginBottom: '20px'
-              }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>Total Exposure</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>1.187.492 Postingan</div>
-                </div>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>Total Engagements</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>23.581.835,38 Engagement</div>
-                </div>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>Total Contributor</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>776.229 Account</div>
-                </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* KPIs Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+                {[
+                  { title: 'Total Exposure', val: '7.480.507 Postingan', icon: <TrendingUp size={16}/> },
+                  { title: 'Total Engagements', val: '329.583.736,21 Engagement', icon: <Users size={16}/> },
+                  { title: 'Total Contributor', val: '3.645.929 Account', icon: <TrendingUp size={16}/> }
+                ].map(kpi => (
+                  <div key={kpi.title} style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>{kpi.title}</div>
+                      <div style={{ fontSize: '16px', fontWeight: '700' }}>{kpi.val}</div>
+                    </div>
+                    <div style={{ backgroundColor: '#eff6ff', padding: '8px', borderRadius: '50%', color: '#3b82f6' }}>
+                      {kpi.icon}
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* Row 2: Split Columns for Trend Charts and Keywords */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '20px', marginBottom: '20px' }}>
-                {/* Left Column: Exposure Trend (Social Channels) & Engagement History */}
+              {/* Trend & Keywords */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Exposure Trend</h4>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Social Media</div>
-                    <div style={{ width: '100%', height: '140px' }}>
-                      <svg viewBox="0 0 400 100" style={{ width: '100%', height: '100%', display: 'block' }}>
-                        {/* Area layers representing Twitter, Facebook, Instagram */}
-                        <path d="M 10 90 Q 80 50 150 70 T 290 40 T 390 20 L 390 90 Z" fill="rgba(37, 99, 235, 0.15)" stroke="#2563eb" strokeWidth="1.5" />
-                        <path d="M 10 90 Q 80 65 150 80 T 290 60 T 390 45 L 390 90 Z" fill="rgba(124, 58, 237, 0.15)" stroke="#7c3aed" strokeWidth="1.5" />
+                  <DashboardCard title="Exposure Trend" subtitle="Shows the trend in the number of posts and comments over time across social media platforms, indicating shifts in activity." source="Social Media">
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '10px', fontSize: '12px', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#2563eb' }}></div> Facebook</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#db2777' }}></div> Instagram</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#9ca3af' }}></div> Threads</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#111827' }}></div> Tiktok</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#06b6d4' }}></div> Twitter</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#dc2626' }}></div> Youtube</span>
+                    </div>
+                    <div style={{ width: '100%', height: '220px', position: 'relative' }}>
+                      <svg viewBox="0 0 500 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                        {[0, 50, 100, 150, 200].map(y => (
+                          <line key={y} x1="40" y1={y} x2="500" y2={y} stroke="#f3f4f6" />
+                        ))}
+                        {/* Twitter Area */}
+                        <path d="M 50 80 Q 150 50 250 70 T 350 20 T 450 30 T 480 120 L 480 200 L 50 200 Z" fill="rgba(6, 182, 212, 0.4)" stroke="#06b6d4" strokeWidth="2" />
+                        {/* Facebook Area */}
+                        <path d="M 50 140 Q 150 150 250 145 T 350 150 T 450 140 L 480 160 L 480 200 L 50 200 Z" fill="rgba(37, 99, 235, 0.2)" stroke="#2563eb" strokeWidth="2" />
                       </svg>
                     </div>
-                  </div>
-
-                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Engagement History</h4>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '12px' }}>🔗 Source: Social Media</div>
-                    <div style={{ width: '100%', height: '100px' }}>
-                      <svg viewBox="0 0 400 80" style={{ width: '100%', height: '100%', display: 'block' }}>
-                        <path d="M 10 60 L 100 30 L 200 50 L 300 15 L 390 40" fill="none" stroke="#d97706" strokeWidth="2.5" />
+                  </DashboardCard>
+                  
+                  <DashboardCard title="Engagement History" subtitle="Shows engagement trends over a defined time period on social media platforms, including likes, shares, comments, and other." source="Media Sosial">
+                    <div style={{ width: '100%', height: '200px' }}>
+                      <svg viewBox="0 0 500 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                        {[0, 40, 80, 120, 160, 200].map(y => (
+                          <line key={y} x1="40" y1={y} x2="500" y2={y} stroke="#f3f4f6" />
+                        ))}
+                        <path d="M 50 60 L 120 80 L 190 70 L 260 20 L 330 60 L 400 130 L 470 180" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#dot)" markerMid="url(#dot)" markerStart="url(#dot)"/>
+                        <defs>
+                          <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
+                            <circle cx="5" cy="5" r="5" fill="#06b6d4" />
+                          </marker>
+                        </defs>
                       </svg>
                     </div>
-                  </div>
+                  </DashboardCard>
                 </div>
 
-                {/* Right Column: Top Keywords & Top Keywords by Engagement */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Keywords</h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignContent: 'center', justifyContent: 'center', flexGrow: 1 }}>
-                      {socialKeywords.map(k => (
-                        <span key={k.text} style={{ fontSize: k.size, color: k.color, fontWeight: k.weight }}>{k.text}</span>
-                      ))}
+                  <DashboardCard title="Top Keywords" subtitle="Displays the top-performing keywords based on the" source="Social Media" style={{ flexGrow: 1 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignContent: 'center', justifyContent: 'center', flexGrow: 1, padding: '20px' }}>
+                      <span style={{ fontSize: '24px', color: '#0369a1' }}>bank account</span>
+                      <span style={{ fontSize: '20px', color: '#b45309' }}>world cup</span>
+                      <span style={{ fontSize: '26px', color: '#15803d' }}>donald trump</span>
+                      <span style={{ fontSize: '22px', color: '#0284c7' }}>direct message</span>
+                      <span style={{ fontSize: '28px', color: '#be185d' }}>terima kasih</span>
+                      <span style={{ fontSize: '20px', color: '#047857' }}>melipa t_t angan</span>
+                      <span style={{ fontSize: '22px', color: '#0369a1' }}>united states</span>
+                      <span style={{ fontSize: '18px', color: '#166534' }}>west bank</span>
                     </div>
-                  </div>
+                  </DashboardCard>
 
-                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Keywords by Engagement</h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignContent: 'center', justifyContent: 'center', flexGrow: 1 }}>
-                      <span style={{ fontSize: '1.2rem', color: '#d97706', fontWeight: 'bold' }}>#kawalkeputusan</span>
-                      <span style={{ fontSize: '1rem', color: '#dc2626' }}>#PEACHANDMESERIESEP2</span>
+                  <DashboardCard title="Top Keywords by Engagement" subtitle="Displays the top-performing keywords based on the" source="Social Media" style={{ flexGrow: 1 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignContent: 'center', justifyContent: 'center', flexGrow: 1, padding: '20px' }}>
+                      <span style={{ fontSize: '18px', color: '#0369a1' }}>terima kasih</span>
+                      <span style={{ fontSize: '20px', color: '#15803d' }}>kejaksaan agung</span>
+                      <span style={{ fontSize: '14px', color: '#b45309' }}>hidup gue</span>
+                      <span style={{ fontSize: '16px', color: '#be185d' }}>menteri pu</span>
+                      <span style={{ fontSize: '14px', color: '#047857' }}>melipat tangan</span>
                     </div>
-                  </div>
+                  </DashboardCard>
                 </div>
               </div>
-
-              {/* Row 3: Total Posts & Total Engagement Platform */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Total Posts</h4>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
-                    <tbody>
-                      <tr style={{ borderBottom: '1px dashed #e2e8f0' }}>
-                        <td style={{ padding: '8px 0', fontWeight: '600' }}>Twitter</td>
-                        <td style={{ padding: '8px 0', textAlign: 'right', color: '#64748b' }}>866.546 posts</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px dashed #e2e8f0' }}>
-                        <td style={{ padding: '8px 0', fontWeight: '600' }}>Tiktok</td>
-                        <td style={{ padding: '8px 0', textAlign: 'right', color: '#64748b' }}>154.456 posts</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Total Engagement Platform</h4>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
-                    <tbody>
-                      <tr style={{ borderBottom: '1px dashed #e2e8f0' }}>
-                        <td style={{ padding: '8px 0', fontWeight: '600' }}>Twitter</td>
-                        <td style={{ padding: '8px 0', textAlign: 'right', color: '#64748b' }}>10.187.946,08</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px dashed #e2e8f0' }}>
-                        <td style={{ padding: '8px 0', fontWeight: '600' }}>Tiktok</td>
-                        <td style={{ padding: '8px 0', textAlign: 'right', color: '#64748b' }}>4,231,040,12</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Row 4: Top Contributors, Locations, and Cities */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Contributors</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.75rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>@sakti_w10</span>
-                      <span style={{ color: '#2563eb', fontWeight: '700' }}>140 posts</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>@info_kpu</span>
-                      <span style={{ color: '#2563eb', fontWeight: '700' }}>98 posts</span>
-                    </div>
+              
+              {/* Hashtags Treemap (Row 10 equivalent) */}
+              <DashboardCard title="Top Hashtags" subtitle="Displays the most frequently used hashtags across social media posts and comments related to monitored issues." source="Social Media">
+                <div style={{ display: 'flex', height: '240px', gap: '2px', color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
+                  <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ flex: 1.5, backgroundColor: '#f59e0b', padding: '12px' }}>NCT 127<br/>(15.560)</div>
+                    <div style={{ flex: 1, backgroundColor: '#06b6d4', padding: '12px' }}>NCT 10TH<br/>ANNIVERSARY<br/>(15.397)</div>
+                  </div>
+                  <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ flex: 1, backgroundColor: '#34d399', padding: '12px' }}>127 INBALI<br/>(15.308)</div>
+                    <div style={{ flex: 1, backgroundColor: '#6ee7b7', padding: '12px' }}>FYP<br/>(13.671)</div>
+                  </div>
+                  <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ flex: 1, backgroundColor: '#fcd34d', padding: '12px' }}>ZONAUANG<br/>(11.770)</div>
+                    <div style={{ flex: 1, backgroundColor: '#fb7185', padding: '12px' }}>POLRIUNTUKMASYARAKAT<br/>(7.917)</div>
+                    <div style={{ flex: 1, backgroundColor: '#f43f5e', padding: '12px' }}>VIRAL<br/>(7.787)</div>
+                  </div>
+                  <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ flex: 1, backgroundColor: '#c084fc', padding: '12px' }}>FIFAWORLDCUP<br/>(7.487)</div>
+                    <div style={{ flex: 1, backgroundColor: '#a78bfa', padding: '12px' }}>KEMENTERIANDESAP<br/>DT<br/>(7.301)</div>
                   </div>
                 </div>
+              </DashboardCard>
 
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Top Locations by Engagement</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {[['Jawa Barat', 90], ['DKI Jakarta', 80]].map(loc => (
-                      <div key={loc[0]} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem' }}>
-                        <span style={{ width: '70px' }}>{loc[0]}</span>
-                        <div style={{ flexGrow: 1, height: '6px', backgroundColor: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ width: `${loc[1]}%`, height: '100%', backgroundColor: '#1e3b8a' }}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>User Location (City Level)</h4>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                    <div style={{ width: '50px', height: '50px' }}>
-                      <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#2563eb" strokeWidth="6" strokeDasharray="60 40" />
-                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#7c3aed" strokeWidth="6" strokeDasharray="40 60" strokeDashoffset="-60" />
-                      </svg>
-                    </div>
-                    <div style={{ fontSize: '0.65rem' }}>
-                      <div>● Bandung (60%)</div>
-                      <div>● Pekanbaru (40%)</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 5: Sentiment Trend & Sentiment Proportion */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Sentiment Trend</h4>
-                  <div style={{ width: '100%', height: '110px' }}>
-                    <svg viewBox="0 0 400 100" style={{ width: '100%', height: '100%' }}>
-                      <path d="M 10 50 Q 150 10 290 60 T 390 30" fill="none" stroke="#10b981" strokeWidth="2" />
-                      <path d="M 10 70 Q 150 90 290 40 T 390 60" fill="none" stroke="#ef4444" strokeWidth="2" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0', alignSelf: 'flex-start' }}>Sentiment Proportion</h4>
-                  <div style={{ width: '70px', height: '70px', margin: 'auto' }}>
-                    <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#10b981" strokeWidth="5" strokeDasharray="35 65" />
-                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" strokeWidth="5" strokeDasharray="45 55" strokeDashoffset="-35" />
-                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#ef4444" strokeWidth="5" strokeDasharray="20 80" strokeDashoffset="-80" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 7: Emotion Trend & Emotion Distribution */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '20px', marginBottom: '20px' }}>
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Emotion Trend</h4>
-                  <div style={{ width: '100%', height: '110px' }}>
-                    <svg viewBox="0 0 400 100" style={{ width: '100%', height: '100%' }}>
-                      <path d="M 10 40 C 100 20, 200 80, 390 10" fill="none" stroke="#ec4899" strokeWidth="2" title="Joy" />
-                      <path d="M 10 80 C 100 90, 200 30, 390 60" fill="none" stroke="#3b82f6" strokeWidth="2" title="Anticipation" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0', alignSelf: 'flex-start' }}>Emotion Distribution</h4>
-                  <div style={{ width: '70px', height: '70px', margin: 'auto' }}>
-                    <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#ec4899" strokeWidth="5" strokeDasharray="50 50" />
-                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" strokeWidth="5" strokeDasharray="30 70" strokeDashoffset="-50" />
-                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#f59e0b" strokeWidth="5" strokeDasharray="20 80" strokeDashoffset="-80" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 9: Sentiment Target (Full Width) */}
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Sentiment Target</h4>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', height: '120px', paddingBottom: '16px' }}>
-                  {['IKN Nusantara', 'Pemerintah', 'Masyarakat'].map((label, idx) => {
-                    const vals = [[50, 30, 20], [60, 20, 20], [45, 35, 20]][idx];
-                    return (
-                      <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'flex-end' }}>
-                        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ height: `${vals[0]}%`, backgroundColor: '#10b981' }}></div>
-                          <div style={{ height: `${vals[1]}%`, backgroundColor: '#3b82f6' }}></div>
-                          <div style={{ height: `${vals[2]}%`, backgroundColor: '#ef4444' }}></div>
-                        </div>
-                        <span style={{ fontSize: '0.7rem', textAlign: 'center', marginTop: '6px', color: '#64748b' }}>{label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Row 10: Top Hashtags (Treemap Grid) */}
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 12px 0' }}>Top Hashtags</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px', height: '120px', color: '#ffffff', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                  <div style={{ backgroundColor: '#3b82f6', padding: '10px', borderRadius: '4px' }}>#kawalkeputusan (65%)</div>
-                  <div style={{ backgroundColor: '#10b981', padding: '10px', borderRadius: '4px' }}>#IKNbaru (20%)</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ backgroundColor: '#7c3aed', padding: '6px', borderRadius: '4px', flexGrow: 1 }}>#Pilkada (10%)</div>
-                    <div style={{ backgroundColor: '#ec4899', padding: '6px', borderRadius: '4px', flexGrow: 1 }}>#KPU (5%)</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 12: Latest Posts (3-Column Social Feed Card Grid) */}
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', margin: '0 0 16px 0' }}>Latest Posts</h4>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  {socialPosts.map(post => (
-                    <div key={post.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', justifyContents: 'space-between', height: '220px' }}>
-                      <div>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
-                          <img src={post.avatar} alt="User avatar" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
-                          <div>
-                            <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0f172a' }}>{post.author}</div>
-                            <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{post.handle} • {post.platform}</div>
-                          </div>
-                        </div>
-                        <p style={{ fontSize: '0.75rem', color: '#475569', margin: '0 0 12px 0', lineHeight: '1.4', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical' }}>{post.desc}</p>
-                      </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <span style={{ fontSize: '0.6rem', fontWeight: '700', padding: '1px 6px', borderRadius: '3px', backgroundColor: '#d1fae5', color: '#065f46' }}>{post.sentiment}</span>
-                          <span style={{ fontSize: '0.6rem', fontWeight: '700', padding: '1px 6px', borderRadius: '3px', backgroundColor: '#fef3c7', color: '#d97706' }}>{post.emotion}</span>
-                        </div>
-                        <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{post.views} Views</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
         </main>
