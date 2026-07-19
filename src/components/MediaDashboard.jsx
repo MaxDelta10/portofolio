@@ -1,450 +1,606 @@
 import React, { useState } from 'react';
 import { 
-  ArrowLeft, Search, Filter, Monitor, Share2, 
-  Settings, Users, ChevronDown, CheckCircle, Clock, Link2
+  Share2, Monitor, Filter, Settings, Users, Clock, 
+  ChevronDown, Calendar, Search, ExternalLink, RefreshCw, ArrowLeft
 } from 'lucide-react';
 
-const DashboardCard = ({ title, subtitle, source, children, style, contentStyle }) => (
-  <div style={{ 
-    backgroundColor: '#ffffff', 
-    border: '1px solid #e5e7eb', 
-    borderRadius: '6px', 
-    display: 'flex', 
-    flexDirection: 'column', 
-    boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-    ...style 
-  }}>
-    <div style={{ padding: '16px', flexGrow: 1, display: 'flex', flexDirection: 'column', ...contentStyle }}>
-      <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#111827' }}>{title}</h3>
-      {subtitle && <p style={{ margin: '4px 0 16px 0', fontSize: '12px', color: '#6b7280' }}>{subtitle}</p>}
-      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        {children}
-      </div>
-    </div>
-    {source && (
-      <div style={{ 
-        padding: '10px 16px', 
-        borderTop: '1px solid #e5e7eb', 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '6px', 
-        fontSize: '12px', 
-        color: '#6b7280' 
-      }}>
-        <Link2 size={14} />
-        Source: {source}
-      </div>
-    )}
-  </div>
-);
-
-export default function MediaDashboard({ onBack }) {
-  const [currentPage, setCurrentPage] = useState('news');
-  const [activeSubTab, setActiveSubTab] = useState('Overview');
-
-  const newsSubTabs = ['Overview', 'Sentimen', 'Top Person', 'Top Organization', 'Top Media', 'Top Influencer', 'Top Keywords', 'Maps', 'Gallery', 'Source News', 'Compare Issue'];
-  const socialSubTabs = ['Overview', 'Engagement', 'Top Contributors', 'Audience Insights', 'Sentiment Analysis', 'Emotion Trend', 'Monitoring Akun', 'Maps', 'Chronology', 'Compare Issue'];
-  const subTabs = currentPage === 'news' ? newsSubTabs : socialSubTabs;
+// Half Donut Chart Component
+const HalfDonutChart = ({ data }) => {
+  // data format: [{ label, value, color, percent }]
+  let currentOffset = 0;
+  const radius = 50;
+  const circumference = Math.PI * radius; // 157.08 for semi-circle
 
   return (
-    <div className="modern-dashboard-theme" style={{
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: '200px', height: '110px', position: 'relative', overflow: 'hidden' }}>
+        <svg viewBox="0 0 120 70" style={{ width: '100%', height: '100%' }}>
+          {/* Base gray background track */}
+          <path 
+            d="M 10 60 A 50 50 0 0 1 110 60" 
+            fill="none" 
+            stroke="#e2e8f0" 
+            strokeWidth="14" 
+            strokeLinecap="butt" 
+          />
+          {data.map((item, index) => {
+            const strokeLength = (item.percent / 100) * circumference;
+            const strokeOffset = circumference - currentOffset;
+            currentOffset += strokeLength;
+
+            return (
+              <path
+                key={index}
+                d="M 10 60 A 50 50 0 0 1 110 60"
+                fill="none"
+                stroke={item.color}
+                strokeWidth="14"
+                strokeDasharray={`${strokeLength} ${circumference}`}
+                strokeDashoffset={strokeOffset}
+                strokeLinecap="butt"
+              />
+            );
+          })}
+        </svg>
+      </div>
+      
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '10px', fontSize: '11px' }}>
+        {data.map((item, index) => (
+          <span key={index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ width: '10px', height: '10px', backgroundColor: item.color, borderRadius: '2px' }} />
+            <span style={{ color: '#4b5563' }}>{item.label} — {item.value} ({item.percent}%)</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default function MediaDashboard({ onBack }) {
+  const [activeTab, setActiveTab] = useState('social'); // 'social' or 'news'
+
+  // Social Media Data Mock
+  const socialMetrics = [
+    { title: 'Total Post', value: '4.432.197', color: '#2563eb' },
+    { title: 'Total Engagement', value: '4.932.578', color: '#7c3aed' },
+    { title: 'Total Akun', value: '927.218', color: '#0d9488' },
+    { title: 'Impressi', value: '102.695B', color: '#16a34a' }
+  ];
+
+  const socialSentimentData = [
+    { label: 'Negatif', value: '1.68M', color: '#dc2626', percent: 49.7 },
+    { label: 'Netral', value: '1.12M', color: '#4b5563', percent: 33.2 },
+    { label: 'Positif', value: '630K', color: '#2563eb', percent: 18.6 }
+  ];
+
+  const socialSentimentEngagementData = [
+    { label: 'Negatif', value: '3.50M', color: '#dc2626', percent: 50.5 },
+    { label: 'Netral', value: '2.75M', color: '#4b5563', percent: 39.7 },
+    { label: 'Positif', value: '680K', color: '#2563eb', percent: 9.8 }
+  ];
+
+  // Online News Data Mock
+  const newsMetrics = [
+    { title: 'Total News', value: '19.081', color: '#2563eb' },
+    { title: 'Sentimen Positif', value: '5.630', color: '#16a34a' },
+    { title: 'Sentimen Netral', value: '9.890', color: '#4b5563' },
+    { title: 'Sentimen Negatif', value: '1.000', color: '#dc2626' }
+  ];
+
+  const newsSentimentData = [
+    { label: 'Positif', value: '5.63K', color: '#16a34a', percent: 29.5 },
+    { label: 'Netral', value: '9.89K', color: '#4b5563', percent: 51.8 },
+    { label: 'Negatif', value: '1.00K', color: '#dc2626', percent: 18.7 }
+  ];
+
+  return (
+    <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f3f4f6', // Light gray background
-      fontFamily: '"Inter", "Segoe UI", sans-serif',
-      color: '#111827',
-      width: '100vw',
-      maxWidth: '100%',
-      overflowX: 'hidden'
+      backgroundColor: '#f8fafc',
+      fontFamily: '"Inter", sans-serif',
+      color: '#0f172a',
+      width: '100vw'
     }}>
+      
       {/* SIDEBAR */}
       <aside style={{
         width: '64px',
-        backgroundColor: '#ffffff',
-        borderRight: '1px solid #e5e7eb',
+        backgroundColor: '#0f172a',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '16px 0',
-        flexShrink: 0,
-        zIndex: 10
+        padding: '20px 0',
+        flexShrink: 0
       }}>
-        {/* MI Logo placeholder */}
+        {/* MI Blue Logo Icon */}
         <div style={{
-          width: '32px',
-          height: '32px',
-          backgroundColor: '#3b82f6',
-          borderRadius: '8px',
-          clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 75% 100%, 0% 100%)',
-          marginBottom: '24px',
+          width: '36px',
+          height: '36px',
+          borderRadius: '50%',
+          backgroundColor: '#2563eb',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: 'white',
-          fontWeight: 'bold',
-          fontSize: '12px'
+          fontWeight: '800',
+          fontSize: '14px',
+          marginBottom: '32px'
         }}>
           mi
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flexGrow: 1, width: '100%', alignItems: 'center' }}>
-          <button style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '10px' }} title="Home"><Monitor size={20} /></button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flexGrow: 1, width: '100%', alignItems: 'center' }}>
+          <button 
+            onClick={() => setActiveTab('social')} 
+            style={{ 
+              background: activeTab === 'social' ? '#1e293b' : 'none', 
+              border: 'none', 
+              color: activeTab === 'social' ? '#3b82f6' : '#94a3b8', 
+              cursor: 'pointer', 
+              padding: '12px', 
+              borderRadius: '8px',
+              transition: 'all 0.2s'
+            }} 
+            title="Monitoring Social Media"
+          >
+            <Share2 size={22} />
+          </button>
           
-          {/* Active indicator logic for tabs */}
-          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
-            {currentPage === 'news' && <div style={{ position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '3px', backgroundColor: '#3b82f6', borderRadius: '0 4px 4px 0' }} />}
-            <button 
-              onClick={() => setCurrentPage('news')} 
-              style={{ 
-                background: currentPage === 'news' ? '#eff6ff' : 'none', 
-                border: 'none', 
-                color: currentPage === 'news' ? '#3b82f6' : '#6b7280', 
-                cursor: 'pointer', 
-                padding: '10px', 
-                borderRadius: '8px' 
-              }} 
-            >
-              <Monitor size={20} />
-            </button>
-          </div>
-
-          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
-            {currentPage === 'social' && <div style={{ position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '3px', backgroundColor: '#3b82f6', borderRadius: '0 4px 4px 0' }} />}
-            <button 
-              onClick={() => setCurrentPage('social')} 
-              style={{ 
-                background: currentPage === 'social' ? '#eff6ff' : 'none', 
-                border: 'none', 
-                color: currentPage === 'social' ? '#3b82f6' : '#6b7280', 
-                cursor: 'pointer', 
-                padding: '10px', 
-                borderRadius: '8px' 
-              }} 
-            >
-              <Share2 size={20} />
-            </button>
-          </div>
+          <button 
+            onClick={() => setActiveTab('news')} 
+            style={{ 
+              background: activeTab === 'news' ? '#1e293b' : 'none', 
+              border: 'none', 
+              color: activeTab === 'news' ? '#3b82f6' : '#94a3b8', 
+              cursor: 'pointer', 
+              padding: '12px', 
+              borderRadius: '8px',
+              transition: 'all 0.2s'
+            }} 
+            title="Monitoring Online News"
+          >
+            <Monitor size={22} />
+          </button>
         </div>
 
-        {/* Exit & Profile */}
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '10px', marginBottom: '16px' }} title="Back">
-          <ArrowLeft size={20} />
-        </button>
+        {/* Back Button & User Profile Avatar */}
+        {onBack && (
+          <button 
+            onClick={onBack} 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: '#94a3b8', 
+              cursor: 'pointer', 
+              padding: '10px', 
+              marginBottom: '16px',
+              borderRadius: '8px',
+              transition: 'all 0.2s'
+            }} 
+            title="Back"
+            onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
         <div style={{
-          width: '32px',
-          height: '32px',
+          width: '36px',
+          height: '36px',
           borderRadius: '50%',
-          backgroundColor: '#8b5cf6',
+          backgroundColor: '#3b82f6',
           color: 'white',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '12px',
-          fontWeight: 'bold'
+          fontSize: '13px',
+          fontWeight: '700'
         }}>
-          SU
+          DS
         </div>
       </aside>
 
-      {/* MAIN CONTAINER */}
-      <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0 }}>
+      {/* CONTENT AREA */}
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minWidth: 0, padding: '24px 32px' }}>
         
-        {/* TOP HEADER */}
-        <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', padding: '20px 24px 0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-            <div>
-              <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '700' }}>Overview</h1>
-              <div style={{ fontSize: '13px', color: '#6b7280', display: 'flex', gap: '6px' }}>
-                <span style={{ color: '#9ca3af' }}>{currentPage === 'news' ? 'News Media' : 'Social Media'}</span>
-                <span>&gt;</span>
-                <span style={{ color: '#374151' }}>Overview</span>
-              </div>
-            </div>
-            <button style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
-              <Search size={20} />
-            </button>
+        {/* HEADER */}
+        <header style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h1 style={{ margin: 0, fontSize: '22px', fontWeight: '700' }}>
+              {activeTab === 'social' ? 'Social Media' : 'Online News'}
+            </h1>
+            <span style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
+              {activeTab === 'social' 
+                ? 'Monitoring Media Sosial - Topik: Rupiah - 07-13 Jun 2026' 
+                : 'Monitoring Berita Online - Topik: Rupiah - 07-13 Jun 2026'}
+            </span>
           </div>
 
-          {/* Sub-tabs */}
-          <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', paddingBottom: '0' }}>
-            {subTabs.map(tab => (
-              <button 
-                key={tab}
-                onClick={() => setActiveSubTab(tab)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '0 0 12px 0',
-                  fontSize: '14px',
-                  fontWeight: activeSubTab === tab ? '600' : '400',
-                  color: activeSubTab === tab ? '#2563eb' : '#4b5563',
-                  borderBottom: activeSubTab === tab ? '3px solid #2563eb' : '3px solid transparent',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {tab}
-              </button>
-            ))}
+          {/* FILTER PILLS */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', fontWeight: '500' }}>
+              <span>T: Rupiah</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '6px 14px', fontSize: '12px' }}>
+              <Calendar size={12} />
+              <span>07 Jun - 13 Jun 2026</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '6px 14px', fontSize: '12px' }}>
+              <span>Account Not Found</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '6px 14px', fontSize: '12px' }}>
+              <span>Platform {activeTab === 'social' ? '6' : '3'}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '6px 14px', fontSize: '12px' }}>
+              <span>Type Content 2</span>
+            </div>
           </div>
         </header>
 
-        {/* WORKSPACE BODY */}
-        <main style={{ padding: '24px', overflowY: 'auto', flexGrow: 1 }}>
-          
-          {/* FILTER BAR */}
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#334155', cursor: 'pointer' }}>
-              Filter <span style={{ backgroundColor: '#bfdbfe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{currentPage === 'news' ? '2' : '4'}</span> <ChevronDown size={14} />
-            </button>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#0369a1', cursor: 'pointer' }}>
-              <Settings size={14} /> General <ChevronDown size={14} />
-            </button>
-            {currentPage === 'social' && (
-              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#0369a1', cursor: 'pointer' }}>
-                <Users size={14} /> Account Not Found <ChevronDown size={14} />
-              </button>
-            )}
-            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#0369a1', cursor: 'pointer' }}>
-              <Clock size={14} /> 18 Jul 26, 13:34 - 19 Jul 26, 13:34
-            </button>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 12px', fontSize: '13px', color: '#334155', cursor: 'pointer' }}>
-              Platform <span style={{ backgroundColor: '#bfdbfe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{currentPage === 'news' ? '3' : '6'}</span>
-            </button>
-          </div>
+        {/* KPI CARDS */}
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '28px' }}>
+          {(activeTab === 'social' ? socialMetrics : newsMetrics).map(kpi => (
+            <div key={kpi.title} style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {kpi.title}
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: '700', color: kpi.color }}>
+                {kpi.value}
+              </div>
+            </div>
+          ))}
+        </section>
 
-          {/* PAGE 1: NEWS MEDIA (News IMA) */}
-          {currentPage === 'news' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* Exposure Trend */}
-              <DashboardCard 
-                title="Exposure Trend" 
-                subtitle="Displays the trend in exposure, indicating the volume of news coverage published by mainstream media over time."
-                source="Mainstream Media"
-              >
-                <div style={{ width: '100%', height: '220px', position: 'relative', marginTop: '20px' }}>
-                  <svg viewBox="0 0 800 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                    {/* Grid lines */}
-                    {[0, 50, 100, 150, 200].map(y => (
-                      <g key={y}>
-                        <line x1="40" y1={y} x2="800" y2={y} stroke="#f3f4f6" />
-                        <text x="30" y={200 - y + 4} fill="#9ca3af" fontSize="10" textAnchor="end">{y === 0 ? '0' : y === 200 ? '3K' : y === 150 ? '2,5K' : y === 100 ? '1,5K' : '1K'}</text>
-                      </g>
-                    ))}
-                    
-                    {/* Bars */}
-                    {[300, 2200, 2300, 1900, 2100, 2000, 1600, 1800, 1600, 1100, 800, 200, 100, 400, 200, 300, 400, 700, 1000, 1200, 1100, 1300, 1400, 1300, 600].map((val, i) => {
-                      const h = (val / 3000) * 200;
-                      return (
-                        <rect key={i} x={50 + i * 30} y={200 - h} width="12" height={h} fill="#1e3a8a" />
-                      );
-                    })}
-                    {/* X axis labels */}
-                    {['13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00'].map((time, i) => (
-                      <text key={i} x={56 + i * 30} y="220" fill="#9ca3af" fontSize="10" textAnchor="middle">{time}</text>
-                    ))}
-                  </svg>
-                </div>
-              </DashboardCard>
-
-              {/* Total News */}
-              <DashboardCard style={{ padding: '0' }} contentStyle={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>Total News</div>
-                  <div style={{ fontSize: '20px', fontWeight: 'bold' }}>34.212</div>
-                </div>
-                <div style={{ backgroundColor: '#eff6ff', padding: '6px', borderRadius: '4px', color: '#3b82f6' }}>
-                  <TrendingUp size={16} />
-                </div>
-              </DashboardCard>
-
-              {/* Sentiment Proportion & Distribution */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
-                <DashboardCard title="Sentiment Proportion" subtitle="Displays the proportion of positive, negative, and neutral" source="Mainstream Media">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '20px', height: '180px' }}>
-                    <div style={{ width: '160px', height: '160px', position: 'relative' }}>
-                      <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#e5e7eb" strokeWidth="6" />
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#dc2626" strokeWidth="6" strokeDasharray="20 100" />
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#4b5563" strokeWidth="6" strokeDasharray="34 100" strokeDashoffset="-20" />
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#1d4ed8" strokeWidth="6" strokeDasharray="46 100" strokeDashoffset="-54" />
-                      </svg>
-                    </div>
-                    <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#1d4ed8' }}></div> Positive (15,53K)</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#4b5563' }}></div> Neutral (11,78K)</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#dc2626' }}></div> Negative (6,91K)</div>
-                    </div>
-                  </div>
-                </DashboardCard>
-                
-                <DashboardCard title="Sentiment Distribution" subtitle="Displays the trend in sentiment over time within mainstream media reporting." source="Mainstream Media">
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '10px', fontSize: '12px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#dc2626' }}></div> Negative</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}></div> Neutral</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#1d4ed8' }}></div> Positive</span>
-                  </div>
-                  <div style={{ width: '100%', height: '180px', position: 'relative' }}>
-                    <svg viewBox="0 0 600 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                      {[0, 37.5, 75, 112.5, 150].map(y => (
-                        <line key={y} x1="30" y1={y} x2="600" y2={y} stroke="#f3f4f6" />
+        {/* SOCIAL MEDIA VIEW */}
+        {activeTab === 'social' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            
+            {/* Exposure & Impression */}
+            <div>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', borderLeft: '4px solid #2563eb', paddingLeft: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Exposure & Impression
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                {/* Exposure Trend */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Exposure Trend</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Volume post per hari</span>
+                  <div style={{ height: '180px', marginTop: '16px' }}>
+                    <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                      {[0, 30, 60, 90, 120, 150].map(y => (
+                        <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
                       ))}
-                      {/* Lines & Points - Blue/Positive */}
-                      <path d="M 40 120 L 70 40 L 100 20 L 130 50 L 160 40 L 190 100 L 220 60 L 250 70 L 280 110 L 310 130 L 340 140 L 370 120 L 400 130 L 430 130 L 460 110 L 490 80 L 520 90 L 550 40 L 580 60" fill="none" stroke="#1d4ed8" strokeWidth="2" />
-                      {/* Grey/Neutral */}
-                      <path d="M 40 130 L 70 70 L 100 70 L 130 90 L 160 70 L 190 70 L 220 80 L 250 90 L 280 120 L 310 140 L 340 130 L 370 140 L 400 120 L 430 140 L 460 120 L 490 70 L 520 60 L 550 80 L 580 100" fill="none" stroke="#4b5563" strokeWidth="2" />
-                      {/* Red/Negative */}
-                      <path d="M 40 140 L 70 80 L 100 90 L 130 90 L 160 80 L 190 90 L 220 80 L 250 110 L 280 110 L 310 145 L 340 140 L 370 145 L 400 140 L 430 130 L 460 110 L 490 120 L 520 120 L 550 120 L 580 140" fill="none" stroke="#dc2626" strokeWidth="2" />
+                      <path d="M 40 120 L 90 90 L 140 80 L 190 60 L 240 40 L 290 50 L 340 60" fill="none" stroke="#2563eb" strokeWidth="2.5" />
+                      {[120, 90, 80, 60, 40, 50, 60].map((y, i) => (
+                        <circle key={i} cx={40 + i * 50} cy={y} r="4" fill="#3b82f6" stroke="white" strokeWidth="1.5" />
+                      ))}
+                      {['07 Jun', '08 Jun', '09 Jun', '10 Jun', '11 Jun', '12 Jun', '13 Jun'].map((x, i) => (
+                        <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="9" textAnchor="middle">{x}</text>
+                      ))}
+                      {['2.0M', '2.5M', '3.0M', '3.5M', '4.0M', '4.5M'].map((val, i) => (
+                        <text key={i} x="20" y={150 - i * 30 + 3} fill="#94a3b8" fontSize="9" textAnchor="end">{val}</text>
+                      ))}
                     </svg>
                   </div>
-                </DashboardCard>
-              </div>
-
-              {/* Sentiment Target */}
-              <DashboardCard title="Sentiment Target" subtitle="Displays sentiment target in mainstream media coverage." source="Mainstream Media">
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '20px', fontSize: '12px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#dc2626' }}></div> Negative</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#4b5563' }}></div> Neutral</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'10px', height:'10px', backgroundColor:'#1d4ed8' }}></div> Positive</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', height: '160px', paddingBottom: '20px' }}>
-                  {['Tni', 'Fifa', 'Prabowo', 'Donald Trump', 'Polri', 'Messi', 'Dpr', 'Epstein'].map((name, i) => {
-                    const hBlue = [40, 20, 20, 15, 10, 5, 5, 2][i];
-                    const hGrey = [40, 30, 20, 20, 15, 5, 5, 2][i];
-                    const hRed  = [20, 10, 10, 5, 5, 2, 2, 1][i];
-                    return (
-                      <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30px' }}>
-                        <div style={{ width: '16px', height: `${hBlue}px`, backgroundColor: '#1d4ed8' }}></div>
-                        <div style={{ width: '16px', height: `${hGrey}px`, backgroundColor: '#4b5563' }}></div>
-                        <div style={{ width: '16px', height: `${hRed}px`, backgroundColor: '#dc2626' }}></div>
-                        <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '8px', textAlign: 'center' }}>{name}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </DashboardCard>
 
-            </div>
-          )}
-
-          {/* PAGE 2: SOCIAL MEDIA (Social Media ISA) */}
-          {currentPage === 'social' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* KPIs Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-                {[
-                  { title: 'Total Exposure', val: '7.480.507 Postingan', icon: <TrendingUp size={16}/> },
-                  { title: 'Total Engagements', val: '329.583.736,21 Engagement', icon: <Users size={16}/> },
-                  { title: 'Total Contributor', val: '3.645.929 Account', icon: <TrendingUp size={16}/> }
-                ].map(kpi => (
-                  <div key={kpi.title} style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>{kpi.title}</div>
-                      <div style={{ fontSize: '16px', fontWeight: '700' }}>{kpi.val}</div>
-                    </div>
-                    <div style={{ backgroundColor: '#eff6ff', padding: '8px', borderRadius: '50%', color: '#3b82f6' }}>
-                      {kpi.icon}
-                    </div>
+                {/* Impression History */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Impression History</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Estimasi tayangan per hari</span>
+                  <div style={{ height: '180px', marginTop: '16px' }}>
+                    <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                      {[0, 30, 60, 90, 120, 150].map(y => (
+                        <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
+                      ))}
+                      <path d="M 40 130 L 90 110 L 140 90 L 190 60 L 240 40 L 290 55 L 340 70" fill="none" stroke="#7c3aed" strokeWidth="2.5" />
+                      {[130, 110, 90, 60, 40, 55, 70].map((y, i) => (
+                        <circle key={i} cx={40 + i * 50} cy={y} r="4" fill="#a78bfa" stroke="white" strokeWidth="1.5" />
+                      ))}
+                      {['07 Jun', '08 Jun', '09 Jun', '10 Jun', '11 Jun', '12 Jun', '13 Jun'].map((x, i) => (
+                        <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="9" textAnchor="middle">{x}</text>
+                      ))}
+                      {['8B', '12B', '16B', '20B', '24B', '28B'].map((val, i) => (
+                        <text key={i} x="20" y={150 - i * 30 + 3} fill="#94a3b8" fontSize="9" textAnchor="end">{val}</text>
+                      ))}
+                    </svg>
                   </div>
-                ))}
+                </div>
               </div>
+            </div>
 
-              {/* Trend & Keywords */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '20px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <DashboardCard title="Exposure Trend" subtitle="Shows the trend in the number of posts and comments over time across social media platforms, indicating shifts in activity." source="Social Media">
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '10px', fontSize: '12px', flexWrap: 'wrap' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#2563eb' }}></div> Facebook</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#db2777' }}></div> Instagram</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#9ca3af' }}></div> Threads</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#111827' }}></div> Tiktok</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#06b6d4' }}></div> Twitter</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#dc2626' }}></div> Youtube</span>
-                    </div>
-                    <div style={{ width: '100%', height: '220px', position: 'relative' }}>
-                      <svg viewBox="0 0 500 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                        {[0, 50, 100, 150, 200].map(y => (
-                          <line key={y} x1="40" y1={y} x2="500" y2={y} stroke="#f3f4f6" />
-                        ))}
-                        {/* Twitter Area */}
-                        <path d="M 50 80 Q 150 50 250 70 T 350 20 T 450 30 T 480 120 L 480 200 L 50 200 Z" fill="rgba(6, 182, 212, 0.4)" stroke="#06b6d4" strokeWidth="2" />
-                        {/* Facebook Area */}
-                        <path d="M 50 140 Q 150 150 250 145 T 350 150 T 450 140 L 480 160 L 480 200 L 50 200 Z" fill="rgba(37, 99, 235, 0.2)" stroke="#2563eb" strokeWidth="2" />
-                      </svg>
-                    </div>
-                  </DashboardCard>
+            {/* Sentiment Analysis */}
+            <div>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', borderLeft: '4px solid #2563eb', paddingLeft: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Sentiment Analysis
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '20px', marginBottom: '20px' }}>
+                {/* Sentiment Trend */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Sentiment Trend</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Trend sentimen 7 hari terakhir</span>
                   
-                  <DashboardCard title="Engagement History" subtitle="Shows engagement trends over a defined time period on social media platforms, including likes, shares, comments, and other." source="Media Sosial">
-                    <div style={{ width: '100%', height: '200px' }}>
-                      <svg viewBox="0 0 500 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                        {[0, 40, 80, 120, 160, 200].map(y => (
-                          <line key={y} x1="40" y1={y} x2="500" y2={y} stroke="#f3f4f6" />
-                        ))}
-                        <path d="M 50 60 L 120 80 L 190 70 L 260 20 L 330 60 L 400 130 L 470 180" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#dot)" markerMid="url(#dot)" markerStart="url(#dot)"/>
-                        <defs>
-                          <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
-                            <circle cx="5" cy="5" r="5" fill="#06b6d4" />
-                          </marker>
-                        </defs>
-                      </svg>
-                    </div>
-                  </DashboardCard>
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', fontSize: '10px', marginBottom: '8px' }}>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#dc2626' }}/> Negatif</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}/> Netral</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#2563eb' }}/> Positif</span>
+                  </div>
+
+                  <div style={{ height: '180px' }}>
+                    <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                      {[0, 30, 60, 90, 120, 150].map(y => (
+                        <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
+                      ))}
+                      {/* Red/Neg line */}
+                      <path d="M 40 90 L 90 85 L 140 75 L 190 70 L 240 65 L 290 60 L 340 70" fill="none" stroke="#dc2626" strokeWidth="1.5" />
+                      {/* Grey/Neu line */}
+                      <path d="M 40 110 L 90 105 L 140 100 L 190 98 L 240 95 L 290 92 L 340 98" fill="none" stroke="#4b5563" strokeWidth="1.5" />
+                      {/* Blue/Pos line */}
+                      <path d="M 40 140 L 90 138 L 140 135 L 190 136 L 240 133 L 290 132 L 340 135" fill="none" stroke="#2563eb" strokeWidth="1.5" />
+                      
+                      {['07 Jun', '08 Jun', '09 Jun', '10 Jun', '11 Jun', '12 Jun', '13 Jun'].map((x, i) => (
+                        <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="9" textAnchor="middle">{x}</text>
+                      ))}
+                      {['100', '180', '260', '340', '420', '500'].map((val, i) => (
+                        <text key={i} x="20" y={150 - i * 30 + 3} fill="#94a3b8" fontSize="9" textAnchor="end">{val}</text>
+                      ))}
+                    </svg>
+                  </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <DashboardCard title="Top Keywords" subtitle="Displays the top-performing keywords based on the" source="Social Media" style={{ flexGrow: 1 }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignContent: 'center', justifyContent: 'center', flexGrow: 1, padding: '20px' }}>
-                      <span style={{ fontSize: '24px', color: '#0369a1' }}>bank account</span>
-                      <span style={{ fontSize: '20px', color: '#b45309' }}>world cup</span>
-                      <span style={{ fontSize: '26px', color: '#15803d' }}>donald trump</span>
-                      <span style={{ fontSize: '22px', color: '#0284c7' }}>direct message</span>
-                      <span style={{ fontSize: '28px', color: '#be185d' }}>terima kasih</span>
-                      <span style={{ fontSize: '20px', color: '#047857' }}>melipa t_t angan</span>
-                      <span style={{ fontSize: '22px', color: '#0369a1' }}>united states</span>
-                      <span style={{ fontSize: '18px', color: '#166534' }}>west bank</span>
-                    </div>
-                  </DashboardCard>
-
-                  <DashboardCard title="Top Keywords by Engagement" subtitle="Displays the top-performing keywords based on the" source="Social Media" style={{ flexGrow: 1 }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignContent: 'center', justifyContent: 'center', flexGrow: 1, padding: '20px' }}>
-                      <span style={{ fontSize: '18px', color: '#0369a1' }}>terima kasih</span>
-                      <span style={{ fontSize: '20px', color: '#15803d' }}>kejaksaan agung</span>
-                      <span style={{ fontSize: '14px', color: '#b45309' }}>hidup gue</span>
-                      <span style={{ fontSize: '16px', color: '#be185d' }}>menteri pu</span>
-                      <span style={{ fontSize: '14px', color: '#047857' }}>melipat tangan</span>
-                    </div>
-                  </DashboardCard>
+                {/* Sentiment Proportion */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Sentiment Proportion</h3>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Distribusi persentase sentimen</span>
+                  </div>
+                  <div style={{ padding: '10px 0' }}>
+                    <HalfDonutChart data={socialSentimentData} />
+                  </div>
                 </div>
               </div>
-              
-              {/* Hashtags Treemap (Row 10 equivalent) */}
-              <DashboardCard title="Top Hashtags" subtitle="Displays the most frequently used hashtags across social media posts and comments related to monitored issues." source="Social Media">
-                <div style={{ display: 'flex', height: '240px', gap: '2px', color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-                  <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <div style={{ flex: 1.5, backgroundColor: '#f59e0b', padding: '12px' }}>NCT 127<br/>(15.560)</div>
-                    <div style={{ flex: 1, backgroundColor: '#06b6d4', padding: '12px' }}>NCT 10TH<br/>ANNIVERSARY<br/>(15.397)</div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '20px' }}>
+                {/* Sentiment by Engagement */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Sentiment by Engagement</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Distribusi sentimen berdasarkan engagement harian</span>
+                  
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', fontSize: '10px', marginBottom: '8px' }}>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#dc2626' }}/> Negatif</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}/> Netral</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#2563eb' }}/> Positif</span>
                   </div>
-                  <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <div style={{ flex: 1, backgroundColor: '#34d399', padding: '12px' }}>127 INBALI<br/>(15.308)</div>
-                    <div style={{ flex: 1, backgroundColor: '#6ee7b7', padding: '12px' }}>FYP<br/>(13.671)</div>
-                  </div>
-                  <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <div style={{ flex: 1, backgroundColor: '#fcd34d', padding: '12px' }}>ZONAUANG<br/>(11.770)</div>
-                    <div style={{ flex: 1, backgroundColor: '#fb7185', padding: '12px' }}>POLRIUNTUKMASYARAKAT<br/>(7.917)</div>
-                    <div style={{ flex: 1, backgroundColor: '#f43f5e', padding: '12px' }}>VIRAL<br/>(7.787)</div>
-                  </div>
-                  <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <div style={{ flex: 1, backgroundColor: '#c084fc', padding: '12px' }}>FIFAWORLDCUP<br/>(7.487)</div>
-                    <div style={{ flex: 1, backgroundColor: '#a78bfa', padding: '12px' }}>KEMENTERIANDESAP<br/>DT<br/>(7.301)</div>
+
+                  <div style={{ height: '180px' }}>
+                    <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                      {[0, 30, 60, 90, 120, 150].map(y => (
+                        <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
+                      ))}
+                      {/* Red/Neg line */}
+                      <path d="M 40 100 L 90 90 L 140 85 L 190 70 L 240 60 L 290 65 L 340 75" fill="none" stroke="#dc2626" strokeWidth="1.5" />
+                      {/* Grey/Neu line */}
+                      <path d="M 40 120 L 90 115 L 140 110 L 190 108 L 240 102 L 290 105 L 340 110" fill="none" stroke="#4b5563" strokeWidth="1.5" />
+                      {/* Blue/Pos line */}
+                      <path d="M 40 142 L 90 140 L 140 138 L 190 135 L 240 134 L 290 135 L 340 137" fill="none" stroke="#2563eb" strokeWidth="1.5" />
+                      
+                      {['07 Jun', '08 Jun', '09 Jun', '10 Jun', '11 Jun', '12 Jun', '13 Jun'].map((x, i) => (
+                        <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="9" textAnchor="middle">{x}</text>
+                      ))}
+                      {['0.5M', '1.0M', '1.5M', '2.0M', '2.5M', '3.0M'].map((val, i) => (
+                        <text key={i} x="20" y={150 - i * 30 + 3} fill="#94a3b8" fontSize="9" textAnchor="end">{val}</text>
+                      ))}
+                    </svg>
                   </div>
                 </div>
-              </DashboardCard>
 
+                {/* Sentiment Proportion by Engagement */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Sentiment Proportion by Engagement</h3>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Proporsi sentimen berdasarkan total engagement</span>
+                  </div>
+                  <div style={{ padding: '10px 0' }}>
+                    <HalfDonutChart data={socialSentimentEngagementData} />
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </main>
+
+          </div>
+        )}
+
+        {/* ONLINE NEWS VIEW */}
+        {activeTab === 'news' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            
+            {/* Exposure Trend */}
+            <div>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', borderLeft: '4px solid #2563eb', paddingLeft: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Exposure Trend
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                {/* Exposure Trend Bar Chart */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Exposure Trend</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Daily news volume</span>
+                  <div style={{ height: '180px', marginTop: '16px' }}>
+                    <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                      {[0, 30, 60, 90, 120, 150].map(y => (
+                        <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
+                      ))}
+                      {/* Bars */}
+                      {[80, 100, 120, 140, 110, 95, 75].map((val, i) => (
+                        <rect 
+                          key={i} 
+                          x={45 + i * 48} 
+                          y={150 - val} 
+                          width="24" 
+                          height={val} 
+                          fill="#2563eb" 
+                          rx="2"
+                        />
+                      ))}
+                      {['07 Jun', '08 Jun', '09 Jun', '10 Jun', '11 Jun', '12 Jun', '13 Jun'].map((x, i) => (
+                        <text key={i} x={57 + i * 48} y="165" fill="#94a3b8" fontSize="9" textAnchor="middle">{x}</text>
+                      ))}
+                      {['1K', '2K', '3K', '4K', '5K'].map((val, i) => (
+                        <text key={i} x="20" y={150 - i * 30 - 15 + 3} fill="#94a3b8" fontSize="9" textAnchor="end">{val}</text>
+                      ))}
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Sentiment Distribution */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Sentiment Distribution</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Daily sentiment breakdown</span>
+                  
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', fontSize: '10px', marginBottom: '8px' }}>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#dc2626' }}/> Negatif</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#4b5563' }}/> Netral</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#16a34a' }}/> Positif</span>
+                  </div>
+
+                  <div style={{ height: '180px' }}>
+                    <svg viewBox="0 0 400 150" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                      {[0, 30, 60, 90, 120, 150].map(y => (
+                        <line key={y} x1="30" y1={y} x2="380" y2={y} stroke="#f1f5f9" />
+                      ))}
+                      <path d="M 40 100 L 90 92 L 140 85 L 190 70 L 240 75 L 290 85 L 340 90" fill="none" stroke="#16a34a" strokeWidth="1.5" />
+                      <path d="M 40 60 L 90 55 L 140 45 L 190 35 L 240 40 L 290 50 L 340 58" fill="none" stroke="#4b5563" strokeWidth="1.5" />
+                      <path d="M 40 135 L 90 130 L 140 128 L 190 120 L 240 125 L 290 130 L 340 132" fill="none" stroke="#dc2626" strokeWidth="1.5" />
+                      
+                      {['07 Jun', '08 Jun', '09 Jun', '10 Jun', '11 Jun', '12 Jun', '13 Jun'].map((x, i) => (
+                        <text key={i} x={40 + i * 50} y="165" fill="#94a3b8" fontSize="9" textAnchor="middle">{x}</text>
+                      ))}
+                      {['200', '400', '600', '800', '1K'].map((val, i) => (
+                        <text key={i} x="20" y={150 - i * 30 - 15 + 3} fill="#94a3b8" fontSize="9" textAnchor="end">{val}</text>
+                      ))}
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sentiment Analysis */}
+            <div>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', borderLeft: '4px solid #2563eb', paddingLeft: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Sentiment Analysis
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: '20px' }}>
+                {/* Sentiment Proportion */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Sentiment Proportion</h3>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Overall news sentiment proportion</span>
+                  </div>
+                  <div style={{ padding: '20px 0' }}>
+                    <HalfDonutChart data={newsSentimentData} />
+                  </div>
+                </div>
+
+                {/* Sentiment Target Stacked Bar Chart */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600' }}>Sentiment Target</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Sentiment towards key targets</span>
+                  
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', fontSize: '10px', marginBottom: '16px' }}>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'2px', backgroundColor:'#dc2626' }}/> Negatif</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'2px', backgroundColor:'#4b5563' }}/> Netral</span>
+                    <span style={{ display:'flex', alignItems:'center', gap:'4px' }}><div style={{ width:'8px', height:'8px', borderRadius:'2px', backgroundColor:'#16a34a' }}/> Positif</span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {[
+                      { name: 'Pemerintah', pos: 50, neu: 35, neg: 15 },
+                      { name: 'Indonesia', pos: 40, neu: 50, neg: 10 },
+                      { name: 'Bank Indonesia', pos: 30, neu: 65, neg: 5 },
+                      { name: 'Rupiah', pos: 25, neu: 55, neg: 20 }
+                    ].map(target => (
+                      <div key={target.name} style={{ display: 'flex', alignItems: 'center', fontSize: '11px' }}>
+                        <div style={{ width: '100px', fontWeight: '500' }}>{target.name}</div>
+                        <div style={{ flexGrow: 1, height: '16px', display: 'flex', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: `${target.pos}%`, backgroundColor: '#16a34a' }} title={`Positif: ${target.pos}%`} />
+                          <div style={{ width: `${target.neu}%`, backgroundColor: '#4b5563' }} title={`Netral: ${target.neu}%`} />
+                          <div style={{ width: `${target.neg}%`, backgroundColor: '#dc2626' }} title={`Negatif: ${target.neg}%`} />
+                        </div>
+                        <div style={{ width: '40px', textAlign: 'right', color: '#64748b', fontSize: '10px', marginLeft: '8px' }}>
+                          {target.pos + target.neu + target.neg}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Person & Keywords */}
+            <div>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', borderLeft: '4px solid #2563eb', paddingLeft: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Top Person & Keywords
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                {/* Top Person */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: '13px', fontWeight: '600' }}>Top Person</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {[
+                      { name: 'Prabowo Subianto', count: '1.240 mentions' },
+                      { name: 'Perry Warjiyo', count: '980 mentions' },
+                      { name: 'Sri Mulyani', count: '850 mentions' },
+                      { name: 'Joko Widodo', count: '620 mentions' },
+                      { name: 'Gibran Rakabuming', count: '410 mentions' }
+                    ].map((person, i) => (
+                      <div key={person.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', backgroundColor: '#f8fafc', borderRadius: '6px', fontSize: '12px' }}>
+                        <span style={{ fontWeight: '500' }}>{i + 1}. {person.name}</span>
+                        <span style={{ color: '#2563eb', fontWeight: '600' }}>{person.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Keywords */}
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: '13px', fontWeight: '600' }}>Top Keywords</h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {[
+                      'stabilitas ekonomi nasional', 'nilai tukar rupiah', 'inflasi terkendali', 
+                      'suku bunga BI', 'pasar uang global', 'kebijakan moneter', 
+                      'pertumbuhan ekonomi', 'cadangan devisa', 'investasi asing', 
+                      'dolar AS', 'fiskal APBN', 'transaksi berjalan'
+                    ].map(tag => (
+                      <span 
+                        key={tag} 
+                        style={{ 
+                          backgroundColor: '#f1f5f9', 
+                          color: '#475569', 
+                          border: '1px solid #e2e8f0',
+                          padding: '6px 12px', 
+                          borderRadius: '16px', 
+                          fontSize: '11px', 
+                          fontWeight: '500' 
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+
       </div>
     </div>
   );
