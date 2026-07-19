@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Terminal, 
-  User, 
-  Cpu, 
-  Briefcase, 
-  Layers, 
-  Mail, 
-  FileText, 
+import {
+  Terminal,
+  User,
+  Cpu,
+  Briefcase,
+  Layers,
+  Mail,
+  FileText,
   ExternalLink,
   ChevronDown,
   ChevronUp,
@@ -174,8 +174,8 @@ function App() {
       {/* Subtle CRT Overlay */}
       <div className={`scanline-overlay ${!scanlines ? 'off' : ''}`}></div>
 
-        <div className="app-container fade-in">
-          {/* Navigation Bar */}
+      <div className="app-container fade-in">
+        {/* Navigation Bar */}
         <nav className="nav-bar">
           <div className="logo-container">
             <Terminal className="section-icon" size={24} />
@@ -190,7 +190,7 @@ function App() {
             <a href="#experience" className="nav-link">QUESTS</a>
             <a href="#projects" className="nav-link">LEVELS</a>
             <a href="#contact" className="nav-link">CONTACT</a>
-            
+
             <button onClick={toggleTheme} className="control-btn" title="Toggle Theme" aria-label="Toggle Theme">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -210,7 +210,7 @@ function App() {
           <span className="hero-badge">PLAYER LEVEL 25</span>
           <h1 className="hero-name">YUSRA SAKTI WARDHANA</h1>
           <p className="hero-sub">Data Scientist / Data Analyst specializing in building scalable scraping modules, high-performance ETL pipelines, and dashboard integrations.</p>
-          
+
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-number">3 YEARS</div>
@@ -243,8 +243,8 @@ function App() {
                 <span style={{ color: 'var(--accent-cyan)' }}>ACTIVE</span>
               </div>
               <p className="about-text">
-                Statisticians-turned-Data Professionals with a passion for designing automated architectures. 
-                I bridge the gap between complex statistical formulas and high-efficiency engineering systems, 
+                Statisticians-turned-Data Professionals with a passion for designing automated architectures.
+                I bridge the gap between complex statistical formulas and high-efficiency engineering systems,
                 specializing in web scraping, pipeline modeling, and search engines like Elasticsearch.
               </p>
               <div className="profile-stats-list">
@@ -310,7 +310,6 @@ function App() {
                 <span className="skill-pill">PostgreSQL</span>
                 <span className="skill-pill">Elasticsearch</span>
                 <span className="skill-pill">MongoDB</span>
-                <span className="skill-pill">Redis</span>
               </div>
             </div>
 
@@ -336,8 +335,6 @@ function App() {
                 <span className="skill-pill">Metabase</span>
                 <span className="skill-pill">Tableau</span>
                 <span className="skill-pill">Git</span>
-                <span className="skill-pill">Docker</span>
-                <span className="skill-pill">Linux Shell</span>
               </div>
             </div>
 
@@ -373,7 +370,7 @@ function App() {
                   <span className="timeline-date">2023 - PRESENT</span>
                 </div>
                 <p className="timeline-desc">
-                  Working with large-scale media databases, designing robust automated systems for media monitoring, 
+                  Working with large-scale media databases, designing robust automated systems for media monitoring,
                   analyzing raw social feeds, and constructing complex index queries for customer-facing dashboards.
                 </p>
                 <ul className="timeline-tasks">
@@ -415,7 +412,7 @@ function App() {
               </div>
               <div className="project-card-body">
                 <p className="project-desc">
-                  Machine learning pipeline designed to analyze and classify reviews from the Steam gaming platform. 
+                  Machine learning pipeline designed to analyze and classify reviews from the Steam gaming platform.
                   Employs natural language processing to extract user sentiments and categories.
                 </p>
                 <div className="project-tags">
@@ -424,7 +421,7 @@ function App() {
                   <span className="project-tag">NLTK</span>
                   <span className="project-tag">Streamlit</span>
                 </div>
-                
+
                 {expandedProject === 0 && (
                   <div className="project-details-expanded fade-in">
                     <h4 className="project-detail-title">Key Quest Accomplishments</h4>
@@ -435,9 +432,9 @@ function App() {
                     </ul>
                   </div>
                 )}
-                
+
                 <div style={{ marginTop: '16px' }}>
-                  <a href="https://github.com/MaxDelta10" target="_blank" rel="noopener noreferrer" className="btn-secondary">
+                  <a href="https://github.com/MaxDelta10/naive-bayes-classifation-steam-game-reviews" target="_blank" rel="noopener noreferrer" className="btn-secondary">
                     VIEW ON GITHUB <ExternalLink size={14} style={{ marginLeft: '4px' }} />
                   </a>
                 </div>
@@ -457,7 +454,7 @@ function App() {
               </div>
               <div className="project-card-body">
                 <p className="project-desc">
-                  Executive analytics dashboard visualizing public sentiment, trending news stories, and 
+                  Executive analytics dashboard visualizing public sentiment, trending news stories, and
                   institutional metrics based on raw streaming elastic search datasets.
                 </p>
                 <div className="project-tags">
@@ -466,7 +463,7 @@ function App() {
                   <span className="project-tag">Kibana</span>
                   <span className="project-tag">Node.js</span>
                 </div>
-                
+
                 {expandedProject === 1 && (
                   <div className="project-details-expanded fade-in">
                     <h4 className="project-detail-title">Key Quest Accomplishments</h4>
@@ -477,13 +474,13 @@ function App() {
                     </ul>
                   </div>
                 )}
-                
+
                 <div style={{ marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <a 
-                    href="https://media-intelligence-portofolio.netlify.app/" 
+                  <a
+                    href="https://media-intelligence-portofolio.netlify.app/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-primary" 
+                    className="btn-primary"
                     style={{ fontSize: '0.7rem', padding: '8px 16px', fontFamily: 'var(--font-pixel)' }}
                   >
                     ENTER SYSTEM (DASHBOARD) <ExternalLink size={14} />
@@ -506,7 +503,7 @@ function App() {
               </div>
               <div className="project-card-body">
                 <p className="project-desc">
-                  Automated notification agent broadcasting critical alerts, anomaly reports, and daily intelligence summaries 
+                  Automated notification agent broadcasting critical alerts, anomaly reports, and daily intelligence summaries
                   straight to WhatsApp groups.
                 </p>
                 <div className="project-tags">
@@ -516,7 +513,7 @@ function App() {
                   <span className="project-tag">OpenAI</span>
                   <span className="project-tag">WhatsApp API</span>
                 </div>
-                
+
                 {expandedProject === 2 && (
                   <div className="project-details-expanded fade-in">
                     <h4 className="project-detail-title">Key Quest Accomplishments</h4>
@@ -527,9 +524,9 @@ function App() {
                     </ul>
                   </div>
                 )}
-                
+
                 <div style={{ marginTop: '16px' }}>
-                  <a href="https://github.com/MaxDelta10" target="_blank" rel="noopener noreferrer" className="btn-secondary">
+                  <a href="https://github.com/MaxDelta10/engine-news-socmed-alert-enrichment" target="_blank" rel="noopener noreferrer" className="btn-secondary">
                     VIEW ON GITHUB <ExternalLink size={14} style={{ marginLeft: '4px' }} />
                   </a>
                 </div>
@@ -545,7 +542,7 @@ function App() {
             <h2 className="section-title">Save Game (Contact)</h2>
           </div>
           <div className="contact-grid">
-            <div className="contact-card">
+            {/* <div className="contact-card">
               <h3 style={{ fontSize: '0.75rem', marginBottom: '16px', color: 'var(--accent-cyan)' }}>[SEND_TRANSMISSION]</h3>
               {formSubmitted ? (
                 <div className="boot-line" style={{ color: 'var(--accent-mint)', padding: '20px 0' }}>
@@ -555,39 +552,39 @@ function App() {
                 <form onSubmit={handleFormSubmit}>
                   <div className="form-group">
                     <label className="form-label" htmlFor="contact-name">Name</label>
-                    <input 
-                      type="text" 
-                      id="contact-name" 
-                      name="name" 
-                      value={formData.name} 
-                      onChange={handleFormChange} 
-                      className="form-input" 
-                      placeholder="e.g. Recruiter" 
-                      required 
+                    <input
+                      type="text"
+                      id="contact-name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleFormChange}
+                      className="form-input"
+                      placeholder="e.g. Recruiter"
+                      required
                     />
                   </div>
                   <div className="form-group">
                     <label className="form-label" htmlFor="contact-email">Email</label>
-                    <input 
-                      type="email" 
-                      id="contact-email" 
-                      name="email" 
-                      value={formData.email} 
-                      onChange={handleFormChange} 
-                      className="form-input" 
-                      placeholder="e.g. agent@agency.com" 
-                      required 
+                    <input
+                      type="email"
+                      id="contact-email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleFormChange}
+                      className="form-input"
+                      placeholder="e.g. agent@agency.com"
+                      required
                     />
                   </div>
                   <div className="form-group">
                     <label className="form-label" htmlFor="contact-message">Message</label>
-                    <textarea 
-                      id="contact-message" 
-                      name="message" 
-                      value={formData.message} 
-                      onChange={handleFormChange} 
-                      className="form-input form-textarea" 
-                      placeholder="Type your quest details here..." 
+                    <textarea
+                      id="contact-message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleFormChange}
+                      className="form-input form-textarea"
+                      placeholder="Type your quest details here..."
                       required
                     ></textarea>
                   </div>
@@ -596,7 +593,7 @@ function App() {
                   </button>
                 </form>
               )}
-            </div>
+            </div> */}
 
             <div className="contact-info-panel">
               <a href="mailto:sakti.wardhana10@gmail.com" className="info-item">
